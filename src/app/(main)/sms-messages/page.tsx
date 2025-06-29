@@ -30,7 +30,7 @@ import {
   AvatarFallback,
 } from "@/components/ui/avatar"
 import { useChild } from "@/contexts/child-context"
-import type { SmsMessage } from "@/contexts/child-context"
+import { sendDeviceCommand } from "@/ai/flows/device-commands"
 
 const messageSchema = z.object({
   recipient: z.string().min(1, { message: "Recipient phone number is required." }),
@@ -65,13 +65,35 @@ export default function SmsMessagesPage() {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
   }
 
-  function onSubmit(values: z.infer<typeof messageSchema>) {
-    console.log(values)
-    toast({
-      title: "Command Sent",
-      description: `Message queued to be sent to ${values.recipient} from ${selectedChild?.name}'s device.`,
-    })
-    form.reset()
+  async function onSubmit(values: z.infer<typeof messageSchema>) {
+    if (!selectedChild) return;
+
+    try {
+      const result = await sendDeviceCommand({
+        childName: selectedChild.name,
+        command: 'sendSms',
+        payload: {
+          recipient: values.recipient,
+          message: values.message,
+        },
+      });
+
+      if (result.success) {
+        toast({
+          title: 'Command Sent',
+          description: result.message,
+        });
+        form.reset();
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      toast({
+        title: 'Error Sending Message',
+        description: `Could not send command: ${error instanceof Error ? error.message : "Please try again."}`,
+        variant: 'destructive',
+      });
+    }
   }
 
   return (
@@ -141,7 +163,7 @@ export default function SmsMessagesPage() {
                             <FormItem>
                             <FormLabel>Recipient Phone Number</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g., 555-0103" {...field} />
+                                <Input placeholder="e.g., 555-0103" {...field} disabled={form.formState.isSubmitting}/>
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -158,6 +180,7 @@ export default function SmsMessagesPage() {
                                 placeholder="Type your message here..."
                                 className="resize-none h-32"
                                 {...field}
+                                disabled={form.formState.isSubmitting}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -165,7 +188,7 @@ export default function SmsMessagesPage() {
                         )}
                         />
                         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                            <Send className="mr-2 h-4 w-4" />
+                            {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                             Send Message Command
                         </Button>
                     </form>

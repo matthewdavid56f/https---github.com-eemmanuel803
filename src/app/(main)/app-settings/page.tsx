@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useChild } from "@/contexts/child-context"
 import type { App } from "@/contexts/child-context"
 import { cn } from "@/lib/utils"
+import { sendDeviceCommand, type DeviceCommandInput } from "@/ai/flows/device-commands"
 
 const appIconMap: Record<string, React.ElementType> = {
   Globe,
@@ -56,38 +57,55 @@ export default function AppSettingsPage() {
   const { selectedChild, isLoading } = useChild()
   const [selectedApp, setSelectedApp] = React.useState<App | null>(null)
   const [timerMinutes, setTimerMinutes] = React.useState("15")
+  const [loadingCommands, setLoadingCommands] = React.useState<Record<string, boolean>>({});
 
-  const handleOpenApp = (appName: string) => {
+  const handleCommand = async (command: DeviceCommandInput['command'], payload: DeviceCommandInput['payload'], app: App) => {
     if (!selectedChild) return;
-    toast({
-      title: "Command Sent",
-      description: `Opening ${appName} on ${selectedChild.name}'s device.`,
-    })
-  }
-  
+
+    const loadingKey = `${command}-${app.packageName}`;
+    setLoadingCommands(prev => ({ ...prev, [loadingKey]: true }));
+
+    try {
+        const input: DeviceCommandInput = {
+            childName: selectedChild.name,
+            command,
+            payload: { ...payload, appName: app.name, packageName: app.packageName },
+        };
+        const result = await sendDeviceCommand(input);
+        if (result.success) {
+            toast({ title: "Command Sent", description: result.message });
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        toast({ title: "Error", description: `Failed to send command: ${error instanceof Error ? error.message : "Unknown error"}`, variant: "destructive" });
+    } finally {
+        setLoadingCommands(prev => ({ ...prev, [loadingKey]: false }));
+        if (command === 'pinApp') {
+            setSelectedApp(null);
+        }
+    }
+  };
+
   const handlePinApp = () => {
-     if (selectedApp && selectedChild) {
-      toast({
-        title: "Command Sent",
-        description: `${selectedApp.name} has been pinned on ${selectedChild.name}'s device. The user cannot exit the app.`,
-      })
-      setSelectedApp(null);
+     if (selectedApp) {
+      handleCommand('pinApp', {}, selectedApp);
     }
   }
 
   const handleSetTimer = () => {
-    if (selectedApp && selectedChild) {
-      toast({
-        title: "Command Sent",
-        description: `${selectedApp.name} has been pinned for ${timerMinutes} minutes on ${selectedChild.name}'s device.`,
-      })
-      setSelectedApp(null);
+    if (selectedApp) {
+      handleCommand('pinApp', { duration: `${timerMinutes} minutes` }, selectedApp);
     }
   }
   
   if (isLoading || !selectedChild) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
   }
+
+  const isAnyCommandLoading = Object.values(loadingCommands).some(Boolean);
+  const isPinning = loadingCommands[`pinApp-${selectedApp?.packageName}`] ?? false;
+
 
   return (
     <div className="flex flex-1 flex-col h-full">
@@ -100,7 +118,7 @@ export default function AppSettingsPage() {
                   <p className="text-muted-foreground">View installed apps and send commands to open or pin them.</p>
               </div>
           </div>
-          <Button>
+          <Button disabled={isAnyCommandLoading}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh List
           </Button>
@@ -121,29 +139,32 @@ export default function AppSettingsPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {selectedChild.installedApps.map((app) => (
-                            <TableRow key={app.packageName}>
-                                <TableCell>
-                                    <div className="flex items-center gap-4">
-                                        <AppIcon name={app.icon} className={app.iconClassName} />
-                                        <div>
-                                            <p className="font-medium">{app.name}</p>
-                                            <p className="text-xs text-muted-foreground">{app.packageName}</p>
-                                        </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>{app.version}</TableCell>
-                                <TableCell className="text-right space-x-2">
-                                    <Button variant="outline" size="sm" onClick={() => handleOpenApp(app.name)}>
-                                        <Play className="mr-2 h-4 w-4" />
-                                        Open
-                                    </Button>
-                                    <Button variant="outline" size="sm" onClick={() => setSelectedApp(app)}>
-                                        <Pin className="mr-2 h-4 w-4" /> Pin App
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {selectedChild.installedApps.map((app) => {
+                            const isOpenLoading = loadingCommands[`openApp-${app.packageName}`];
+                            return (
+                              <TableRow key={app.packageName}>
+                                  <TableCell>
+                                      <div className="flex items-center gap-4">
+                                          <AppIcon name={app.icon} className={app.iconClassName} />
+                                          <div>
+                                              <p className="font-medium">{app.name}</p>
+                                              <p className="text-xs text-muted-foreground">{app.packageName}</p>
+                                          </div>
+                                      </div>
+                                  </TableCell>
+                                  <TableCell>{app.version}</TableCell>
+                                  <TableCell className="text-right space-x-2">
+                                      <Button variant="outline" size="sm" onClick={() => handleCommand('openApp', {}, app)} disabled={isAnyCommandLoading}>
+                                          {isOpenLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+                                          Open
+                                      </Button>
+                                      <Button variant="outline" size="sm" onClick={() => setSelectedApp(app)} disabled={isAnyCommandLoading}>
+                                          <Pin className="mr-2 h-4 w-4" /> Pin App
+                                      </Button>
+                                  </TableCell>
+                              </TableRow>
+                            )
+                        })}
                     </TableBody>
                 </Table>
             </CardContent>
@@ -172,15 +193,16 @@ export default function AppSettingsPage() {
                                 onChange={(e) => setTimerMinutes(e.target.value)}
                                 className="col-span-3"
                                 placeholder="Leave blank to pin indefinitely"
+                                disabled={isPinning}
                             />
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="ghost" onClick={handlePinApp}>
-                            Pin without Timer
+                        <Button variant="ghost" onClick={handlePinApp} disabled={isPinning}>
+                             {isPinning ? <Loader2 className="animate-spin" /> : "Pin without Timer"}
                         </Button>
-                        <Button type="submit" onClick={handleSetTimer}>
-                            <Clock className="mr-2 h-4 w-4" />
+                        <Button type="submit" onClick={handleSetTimer} disabled={isPinning}>
+                             {isPinning ? <Loader2 className="animate-spin mr-2" /> : <Clock className="mr-2 h-4 w-4" />}
                             Set Timer & Pin
                         </Button>
                     </DialogFooter>

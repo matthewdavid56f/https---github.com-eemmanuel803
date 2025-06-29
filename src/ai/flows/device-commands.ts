@@ -12,11 +12,14 @@ import { z } from 'genkit';
 
 export const DeviceCommandInputSchema = z.object({
   childName: z.string().describe("The name of the child whose device will receive the command."),
-  command: z.enum(['lock', 'unlock', 'sendMessage', 'openWebsite']).describe('The type of command to send.'),
+  command: z.enum(['lock', 'unlock', 'sendMessage', 'openWebsite', 'openApp', 'pinApp', 'sendSms']).describe('The type of command to send.'),
   payload: z.object({
-    duration: z.string().optional().describe('The duration for the lock command (e.g., "30 minutes").'),
-    message: z.string().optional().describe('The text for the popup message.'),
+    duration: z.string().optional().describe('The duration for the lock or pin command (e.g., "30 minutes").'),
+    message: z.string().optional().describe('The text for the popup message or SMS.'),
     url: z.string().optional().describe('The URL for the website to open.'),
+    packageName: z.string().optional().describe('The package name of the app to open or pin.'),
+    appName: z.string().optional().describe('The display name of the app.'),
+    recipient: z.string().optional().describe('The phone number for the SMS message.'),
   }).describe('The data associated with the command.'),
 });
 export type DeviceCommandInput = z.infer<typeof DeviceCommandInputSchema>;
@@ -57,6 +60,19 @@ const deviceCommandFlow = ai.defineFlow(
             break;
         case 'openWebsite':
             message = `Force open website command sent to ${input.childName}'s device.`;
+            break;
+        case 'openApp':
+            message = `Command to open ${input.payload.appName || 'app'} sent to ${input.childName}'s device.`;
+            break;
+        case 'pinApp':
+            if (input.payload.duration) {
+                message = `Command to pin ${input.payload.appName || 'app'} for ${input.payload.duration} sent to ${input.childName}'s device.`;
+            } else {
+                message = `Command to pin ${input.payload.appName || 'app'} indefinitely sent to ${input.childName}'s device.`;
+            }
+            break;
+        case 'sendSms':
+            message = `SMS to ${input.payload.recipient} queued for sending from ${input.childName}'s device.`;
             break;
     }
 
