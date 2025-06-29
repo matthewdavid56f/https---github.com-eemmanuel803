@@ -12,9 +12,8 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      <circle cx="12" cy="12" r="2.5" fill="currentColor" />
-       <path d="M12 9.5 A2.5 2.5 0 0 1 12 14.5" stroke="var(--sidebar-background)" />
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" fill="currentColor" />
     </svg>
   )
 }

@@ -2,19 +2,16 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-
 import { cn } from "@/lib/utils"
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarHeader,
-  SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Logo } from "@/components/icons"
-import { Bell, LayoutDashboard, LineChart, Settings } from "lucide-react"
+import { LayoutDashboard, MapPin, Users, Phone, MessageSquare, Camera, Folder, Settings, Shield } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -23,56 +20,43 @@ export function DashboardNav() {
     return pathname === path
   }
 
+  const navItems = [
+    { href: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
+    { href: "/location", icon: <MapPin />, label: "Location" },
+    { href: "/contacts", icon: <Users />, label: "Contacts" },
+    { href: "/call-logs", icon: <Phone />, label: "Call Logs" },
+    { href: "/sms-messages", icon: <MessageSquare />, label: "SMS Messages" },
+    { href: "/live-view", icon: <Camera />, label: "Live View" },
+    { href: "/file-explorer", icon: <Folder />, label: "File Explorer" },
+    { href: "/app-settings", icon: <Settings />, label: "App Settings" },
+    { href: "/device-controls", icon: <Shield />, label: "Device Controls" },
+  ]
+
   return (
     <div className="flex h-full flex-col">
       <SidebarHeader className="h-14">
         <Link href="/" className="flex items-center gap-2">
-          <Logo className="size-8 text-primary-foreground" />
-          <span className="text-lg font-semibold text-primary-foreground">Guad Eyes</span>
+          <Logo className="size-8 text-primary" />
+          <span className="text-lg font-semibold text-primary-foreground">Synthetic Eyes</span>
         </Link>
       </SidebarHeader>
 
       <SidebarGroup className="flex-1">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={isActive("/dashboard")}
-              tooltip="Dashboard"
-            >
-              <Link href="#">
-                <LayoutDashboard />
-                Dashboard
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/alerts")} tooltip="Alerts">
-              <Link href="#">
-                <Bell />
-                Alerts
-                <span className="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
-                  3
-                </span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/reports")} tooltip="Reports">
-              <Link href="#">
-                <LineChart />
-                Reports
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/settings")} tooltip="Settings">
-              <Link href="#">
-                <Settings />
-                Settings
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {navItems.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.href)}
+                tooltip={item.label}
+              >
+                <Link href={item.href}>
+                  {item.icon}
+                  {item.label}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
         </SidebarMenu>
       </SidebarGroup>
     </div>
