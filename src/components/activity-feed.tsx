@@ -1,6 +1,7 @@
 
 "use client"
 
+import * as React from "react"
 import {
   Card,
   CardContent,
@@ -13,11 +14,13 @@ import {
   AvatarFallback,
 } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { FileImage, ShieldAlert, Smartphone, ClipboardCopy } from "lucide-react"
+import { FileImage, ShieldAlert, Smartphone, ClipboardCopy, type LucideProps } from "lucide-react"
 import { Badge } from "./ui/badge"
+import { cn } from "@/lib/utils"
 
 export type Activity = {
-  icon: React.ReactNode,
+  icon: string,
+  iconClassName?: string,
   title: string,
   description: string,
   time: string,
@@ -29,55 +32,22 @@ export type Activity = {
   badge?: React.ReactNode
 }
 
-export const mockActivities: Activity[] = [
-  {
-    icon: <ShieldAlert className="size-5 text-destructive" />,
-    title: "Harmful Content Detected",
-    description: "AI detected a potentially harmful message in a chat application.",
-    time: "2m ago",
-    details: {
-      source: "Notification",
-      reason: "The message contains bullying language.",
-      isHarmful: true
-    },
-    badge: <Badge variant="destructive">Urgent</Badge>
-  },
-  {
-    icon: <FileImage className="size-5" />,
-    title: "New Screenshot Captured",
-    description: "A screenshot of a social media post was taken.",
-    time: "15m ago",
-  },
-  {
-    icon: <Smartphone className="size-5 text-blue-500" />,
-    title: "New App Installed",
-    description: "'Clash of Clans' was installed from the Play Store.",
-    time: "1h ago",
-    badge: <Badge variant="secondary">Info</Badge>
-  },
-  {
-    icon: <ClipboardCopy className="size-5" />,
-    title: "Clipboard Content Copied",
-    description: "A URL was copied to the clipboard: https://example.com/...",
-    time: "2h ago",
-  },
-    {
-    icon: <ShieldAlert className="size-5 text-amber-500" />,
-    title: "Suspicious Website Visited",
-    description: "AI flagged a website with unmoderated chat features.",
-    time: "3h ago",
-     details: {
-      source: "Screenshot",
-      reason: "The website contains a public chat room which may expose the child to strangers.",
-      isHarmful: true
-    },
-    badge: <Badge variant="outline" className="border-amber-500 text-amber-500">Warning</Badge>
-  },
-];
-
 interface ActivityFeedProps {
   activities: Activity[];
 }
+
+const iconMap: { [key: string]: React.FC<LucideProps> } = {
+  ShieldAlert,
+  FileImage,
+  Smartphone,
+  ClipboardCopy,
+};
+
+const ActivityIcon: React.FC<{ name: string; className?: string }> = ({ name, className }) => {
+  const IconComponent = iconMap[name];
+  if (!IconComponent) return null;
+  return <IconComponent className={cn("size-5", className)} />;
+};
 
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
@@ -95,7 +65,9 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
             {activities.map((activity, index) => (
               <div key={index} className="flex items-start gap-4">
                 <Avatar className="h-9 w-9 border">
-                  <AvatarFallback className="bg-background">{activity.icon}</AvatarFallback>
+                  <AvatarFallback className="bg-background">
+                    <ActivityIcon name={activity.icon} className={activity.iconClassName} />
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1 flex-1">
                   <div className="flex items-center justify-between">
@@ -109,7 +81,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                   <p className="text-sm text-muted-foreground">
                     {activity.description}
                   </p>
-                  {activity.details && (
+                  {activity.details && activity.details.isHarmful && (
                      <p className="text-xs text-destructive/80 mt-1 p-2 bg-destructive/10 rounded-md border border-destructive/20">
                       <strong>AI Analysis:</strong> {activity.details.reason}
                     </p>

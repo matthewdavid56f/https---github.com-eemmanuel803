@@ -5,14 +5,14 @@ import * as React from "react"
 import { DeviceStatusCard } from "@/components/device-status-card"
 import { KeyMetricCard } from "@/components/key-metric-card"
 import { ActivityFeed, Activity } from "@/components/activity-feed"
-import { AlertTriangle, Hourglass, ShieldCheck, Loader2, ShieldAlert } from "lucide-react"
+import { AlertTriangle, Hourglass, ShieldCheck, Loader2 } from "lucide-react"
 import { ScreenTimeChart } from "@/components/screen-time-chart"
 import { useChild } from "@/contexts/child-context"
 import { analyzeContent, AnalyzeContentInput } from "@/ai/flows/analyze-content"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 export default function DashboardPage() {
-  const { childrenData, selectedChild, setSelectedChildId } = useChild()
+  const { childrenData, selectedChild, setSelectedChildId, isLoading } = useChild()
   const [processedActivities, setProcessedActivities] = React.useState<Activity[]>([]);
   const [isAnalyzing, setIsAnalyzing] = React.useState(true);
 
@@ -62,6 +62,10 @@ export default function DashboardPage() {
     processActivities();
   }, [selectedChild]);
 
+  if (!selectedChild) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+
   return (
     <main className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="space-y-4">
@@ -92,7 +96,7 @@ export default function DashboardPage() {
           />
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
-            {isAnalyzing ? (
+            {isLoading || isAnalyzing ? (
               <Card className="h-full">
                 <CardHeader>
                   <CardTitle>Activity Feed</CardTitle>

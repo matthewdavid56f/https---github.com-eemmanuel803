@@ -7,17 +7,21 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { useChild } from "@/contexts/child-context"
-import { ShieldAlert, Globe, Send } from "lucide-react"
+import { ShieldAlert, Globe, Send, Loader2 } from "lucide-react"
 
 export default function DeviceControlsPage() {
   const { toast } = useToast()
-  const { selectedChild } = useChild()
+  const { selectedChild, isLoading } = useChild()
 
   const handleAction = (message: string) => {
     toast({
       title: "Command Sent",
       description: message,
     })
+  }
+
+  if (isLoading || !selectedChild) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
   }
 
   return (

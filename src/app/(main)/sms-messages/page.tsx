@@ -38,10 +38,9 @@ const messageSchema = z.object({
 })
 
 export default function SmsMessagesPage() {
-  const [isLoading, setIsLoading] = React.useState(true)
-  const [messages, setMessages] = React.useState<SmsMessage[]>([])
+  const [isRefreshing, setIsRefreshing] = React.useState(false)
   const { toast } = useToast()
-  const { selectedChild } = useChild()
+  const { selectedChild, isLoading } = useChild()
 
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
@@ -52,22 +51,25 @@ export default function SmsMessagesPage() {
   })
 
   const fetchMessages = React.useCallback(() => {
-    setIsLoading(true)
+    setIsRefreshing(true)
     setTimeout(() => {
-      setMessages(selectedChild.smsMessages)
-      setIsLoading(false)
+      setIsRefreshing(false)
     }, 1200)
-  }, [selectedChild])
+  }, [])
 
   React.useEffect(() => {
     fetchMessages()
   }, [fetchMessages])
+  
+  if (isLoading || !selectedChild) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
 
   function onSubmit(values: z.infer<typeof messageSchema>) {
     console.log(values)
     toast({
       title: "Command Sent",
-      description: `Message queued to be sent to ${values.recipient} from ${selectedChild.name}'s device.`,
+      description: `Message queued to be sent to ${values.recipient} from ${selectedChild?.name}'s device.`,
     })
     form.reset()
   }
@@ -91,14 +93,14 @@ export default function SmsMessagesPage() {
         <div className="lg:col-span-3">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Message History</h2>
-            <Button variant="outline" onClick={fetchMessages} disabled={isLoading}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <Button variant="outline" onClick={fetchMessages} disabled={isRefreshing}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
           </div>
           <Card className="h-[600px] flex flex-col">
             <CardContent className="p-0 flex-1">
-              {isLoading ? (
+              {isRefreshing ? (
                  <div className="flex flex-col items-center justify-center h-full">
                     <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
                     <p className="text-muted-foreground">Loading messages...</p>
@@ -106,7 +108,7 @@ export default function SmsMessagesPage() {
               ) : (
                 <ScrollArea className="h-full">
                    <div className="p-6 space-y-4">
-                     {messages.map((msg) => (
+                     {selectedChild.smsMessages.map((msg) => (
                        <div key={msg.id} className="flex items-start gap-4">
                           <Avatar>
                             <AvatarFallback>{msg.avatar}</AvatarFallback>

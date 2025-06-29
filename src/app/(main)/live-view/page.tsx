@@ -5,16 +5,17 @@ import * as React from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { Video, Monitor, Camera, Image as ImageIcon, Mic, ShieldCheck, ShieldOff } from "lucide-react"
+import { Video, Monitor, Camera, Image as ImageIcon, Mic, ShieldCheck, ShieldOff, Loader2 } from "lucide-react"
 import { InteractivePhoneScreen } from "@/components/interactive-phone-screen"
 import { useChild } from "@/contexts/child-context"
 
 export default function LiveViewPage() {
   const [remoteControlEnabled, setRemoteControlEnabled] = React.useState(false)
   const { toast } = useToast()
-  const { selectedChild } = useChild()
+  const { selectedChild, isLoading } = useChild()
 
   const handleAction = (message: string) => {
+    if (!selectedChild) return;
     toast({
       title: "Command Sent",
       description: `${message} for ${selectedChild.name}.`,
@@ -22,12 +23,17 @@ export default function LiveViewPage() {
   }
   
   const toggleRemoteControl = () => {
+    if (!selectedChild) return;
     const wasEnabled = remoteControlEnabled;
     setRemoteControlEnabled(!wasEnabled)
     toast({
       title: "Command Sent",
       description: `Remote control has been ${!wasEnabled ? 'enabled' : 'disabled'} for ${selectedChild.name}.`,
     })
+  }
+  
+  if (isLoading || !selectedChild) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
   }
 
   return (

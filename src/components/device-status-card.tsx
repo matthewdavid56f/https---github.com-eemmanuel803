@@ -17,19 +17,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Battery, Smartphone } from "lucide-react"
-
-type ChildData = {
-  id: string;
-  name: string;
-  avatar: string;
-  deviceName: string;
-  isOnline: boolean;
-  batteryLevel: number;
-}
+import type { ChildSummary, Child } from "@/lib/data"
 
 interface DeviceStatusCardProps {
-  childrenData: ChildData[];
-  selectedChild: ChildData;
+  childrenData: ChildSummary[];
+  selectedChild: Child;
   onChildChange: (id: string) => void;
 }
 

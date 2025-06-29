@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Phone as PhoneIcon, RefreshCw, ArrowDownLeft, ArrowUpRight, PhoneMissed } from "lucide-react"
+import { Phone as PhoneIcon, RefreshCw, ArrowDownLeft, ArrowUpRight, PhoneMissed, Loader2 } from "lucide-react"
 import { useChild } from "@/contexts/child-context"
 
 const callTypeDetails = {
@@ -27,13 +27,18 @@ const callTypeDetails = {
 }
 
 export default function CallLogsPage() {
-    const [isLoading, setIsLoading] = React.useState(false)
-    const { selectedChild } = useChild()
+    const [isRefreshing, setIsRefreshing] = React.useState(false)
+    const { selectedChild, isLoading } = useChild()
 
     const handleRefresh = () => {
-        setIsLoading(true)
-        setTimeout(() => setIsLoading(false), 1500)
+        setIsRefreshing(true)
+        setTimeout(() => setIsRefreshing(false), 1500)
     }
+
+    if (isLoading || !selectedChild) {
+      return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+    }
+
   return (
     <div className="flex flex-1 flex-col h-full">
       <header className="p-6 md:p-8">
@@ -47,8 +52,8 @@ export default function CallLogsPage() {
               <p className="text-muted-foreground">View the device's call history.</p>
             </div>
           </div>
-          <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh Logs
           </Button>
         </div>

@@ -23,7 +23,7 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar"
 import { useToast } from "@/hooks/use-toast"
-import { Folder as FolderIcon, File as FileIcon, FileImage, FileVideo, FileText, Music, ArrowLeft, RefreshCw, Download } from "lucide-react"
+import { Folder as FolderIcon, File as FileIcon, FileImage, FileVideo, FileText, Music, ArrowLeft, RefreshCw, Download, Loader2 } from "lucide-react"
 import type { FileSystemItem } from "@/contexts/child-context"
 import { useChild } from "@/contexts/child-context"
 
@@ -44,9 +44,19 @@ const getFileIcon = (item: FileSystemItem) => {
 
 export default function FileExplorerPage() {
   const { toast } = useToast()
-  const { selectedChild } = useChild()
+  const { selectedChild, isLoading } = useChild()
   const [currentPath, setCurrentPath] = React.useState('/')
   const [history, setHistory] = React.useState<string[]>(['/'])
+  
+  // Reset path when child changes
+  React.useEffect(() => {
+      setCurrentPath('/');
+      setHistory(['/']);
+  }, [selectedChild]);
+
+  if (isLoading || !selectedChild) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
 
   const handleItemClick = (item: FileSystemItem) => {
     if (item.type === 'folder') {

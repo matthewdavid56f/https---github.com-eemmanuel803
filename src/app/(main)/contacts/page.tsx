@@ -23,32 +23,13 @@ import {
 } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
-import { Users, RefreshCw, Phone, MessageSquare, Search } from "lucide-react"
+import { Users, RefreshCw, Phone, MessageSquare, Search, Loader2 } from "lucide-react"
 import { useChild } from "@/contexts/child-context"
-
-type Contact = {
-  name: string
-  phone: string
-  avatar: string
-  avatarImage?: string
-}
-
-const mockContacts: Contact[] = [
-  { name: 'Mom', phone: '555-0101', avatar: 'M', avatarImage: 'https://placehold.co/40x40.png' },
-  { name: 'Dad', phone: '555-0102', avatar: 'D', avatarImage: 'https://placehold.co/40x40.png' },
-  { name: 'Alex Johnson', phone: '555-0103', avatar: 'A', avatarImage: 'https://placehold.co/40x40.png' },
-  { name: 'Dr. Smith (Pediatrician)', phone: '555-0104', avatar: 'DS' },
-  { name: 'Grandma', phone: '555-0105', avatar: 'G' },
-  { name: 'Coach Miller', phone: '555-0106', avatar: 'CM' },
-  { name: 'Pizza Palace', phone: '555-0199', avatar: 'PP' },
-  { name: 'Emily Carter', phone: '555-0107', avatar: 'EC' },
-  { name: 'David Lee', phone: '555-0108', avatar: 'DL' },
-]
 
 export default function ContactsPage() {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = React.useState("")
-  const { selectedChild } = useChild()
+  const { selectedChild, isLoading } = useChild()
 
   const handleAction = (message: string) => {
     toast({
@@ -57,7 +38,11 @@ export default function ContactsPage() {
     })
   }
   
-  const filteredContacts = mockContacts.filter(contact => 
+  if (isLoading || !selectedChild) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+  
+  const filteredContacts = selectedChild.contacts.filter(contact => 
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     contact.phone.includes(searchTerm)
   )

@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { Settings, RefreshCw, Play, Pin, Clock, Shield, Youtube, Instagram, Gamepad2, Music, Globe } from "lucide-react"
+import { Settings, RefreshCw, Play, Pin, Clock, Loader2, Globe, Youtube, Instagram, Gamepad2, Music, Shield } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -31,14 +31,34 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { useChild } from "@/contexts/child-context"
 import type { App } from "@/contexts/child-context"
+import { cn } from "@/lib/utils"
+
+const appIconMap: Record<string, React.ElementType> = {
+  Globe,
+  Youtube,
+  Gamepad2,
+  Shield,
+  Music,
+  Instagram,
+};
+
+const AppIcon = ({ name, className }: { name: string; className?: string }) => {
+  const IconComponent = appIconMap[name];
+  if (!IconComponent) {
+    return <div className="w-8 h-8" />;
+  }
+  return <IconComponent className={cn("w-8 h-8", className)} />;
+};
+
 
 export default function AppSettingsPage() {
   const { toast } = useToast()
-  const { selectedChild } = useChild()
+  const { selectedChild, isLoading } = useChild()
   const [selectedApp, setSelectedApp] = React.useState<App | null>(null)
   const [timerMinutes, setTimerMinutes] = React.useState("15")
 
   const handleOpenApp = (appName: string) => {
+    if (!selectedChild) return;
     toast({
       title: "Command Sent",
       description: `Opening ${appName} on ${selectedChild.name}'s device.`,
@@ -46,7 +66,7 @@ export default function AppSettingsPage() {
   }
   
   const handlePinApp = () => {
-     if (selectedApp) {
+     if (selectedApp && selectedChild) {
       toast({
         title: "Command Sent",
         description: `${selectedApp.name} has been pinned on ${selectedChild.name}'s device. The user cannot exit the app.`,
@@ -56,13 +76,17 @@ export default function AppSettingsPage() {
   }
 
   const handleSetTimer = () => {
-    if (selectedApp) {
+    if (selectedApp && selectedChild) {
       toast({
         title: "Command Sent",
         description: `${selectedApp.name} has been pinned for ${timerMinutes} minutes on ${selectedChild.name}'s device.`,
       })
       setSelectedApp(null);
     }
+  }
+  
+  if (isLoading || !selectedChild) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
   }
 
   return (
@@ -101,7 +125,7 @@ export default function AppSettingsPage() {
                             <TableRow key={app.packageName}>
                                 <TableCell>
                                     <div className="flex items-center gap-4">
-                                        {app.icon}
+                                        <AppIcon name={app.icon} className={app.iconClassName} />
                                         <div>
                                             <p className="font-medium">{app.name}</p>
                                             <p className="text-xs text-muted-foreground">{app.packageName}</p>

@@ -14,13 +14,29 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-import { MapPin, RefreshCw, PlusCircle } from "lucide-react"
+import { MapPin, RefreshCw, PlusCircle, Loader2, Home, School } from "lucide-react"
 import { useChild } from "@/contexts/child-context"
+import { cn } from "@/lib/utils"
+
+const geofenceIconMap: Record<string, React.ElementType> = {
+  Home,
+  School,
+};
+
+const GeofenceIcon = ({ name, className }: { name: string; className?: string }) => {
+  const IconComponent = geofenceIconMap[name];
+  if (!IconComponent) return null;
+  return <IconComponent className={cn("w-6 h-6", className)} />;
+};
 
 export default function LocationPage() {
   const { toast } = useToast()
-  const { selectedChild } = useChild()
+  const { selectedChild, isLoading } = useChild()
   const [isRefreshing, setIsRefreshing] = React.useState(false)
+
+  if (isLoading || !selectedChild) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
 
   const handleRefresh = () => {
     setIsRefreshing(true)
@@ -107,7 +123,7 @@ export default function LocationPage() {
                <ul className="space-y-4">
                    {selectedChild.geofences.map(zone => (
                        <li key={zone.name} className="flex items-center gap-4">
-                           {zone.icon}
+                           <GeofenceIcon name={zone.icon} className={zone.iconClassName} />
                            <div className="flex-1">
                                <p className="font-medium">{zone.name}</p>
                                <p className="text-xs text-muted-foreground">{zone.address}</p>
