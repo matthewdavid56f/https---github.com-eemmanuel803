@@ -6,7 +6,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { Video, Monitor, Camera, Image as ImageIcon, Mic, ShieldCheck, ShieldOff } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { InteractivePhoneScreen } from "@/components/interactive-phone-screen"
 
 export default function LiveViewPage() {
   const [remoteControlEnabled, setRemoteControlEnabled] = React.useState(false)
@@ -37,29 +37,23 @@ export default function LiveViewPage() {
             </div>
           <div>
             <h1 className="text-2xl font-bold">Live View &amp; Remote Control</h1>
-            <p className="text-muted-foreground">Send commands to watch the screen, access cameras, and operate the device remotely.</p>
+            <p className="text-muted-foreground">Watch the screen, access cameras, and operate the device remotely.</p>
           </div>
         </div>
       </header>
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 pt-0">
         <div className="flex items-center justify-center bg-card p-4 rounded-lg">
-            <div className="relative w-full max-w-[300px] aspect-[9/18] rounded-2xl overflow-hidden shadow-lg border-4 border-muted">
-                <Image
-                    src="https://placehold.co/400x800.png"
-                    alt="Live device screen"
-                    fill
-                    className={cn(
-                        "object-cover transition-all",
-                        remoteControlEnabled && "blur-sm brightness-50"
-                    )}
-                    data-ai-hint="building architecture"
-                />
-                {remoteControlEnabled && (
-                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
-                        <ShieldCheck className="w-16 h-16 text-green-500 mb-4 animate-pulse" />
-                        <h2 className="text-2xl font-bold text-white">Remote Control Active</h2>
-                        <p className="text-white/80 mt-2">The device screen is now blank. You have full control.</p>
-                    </div>
+            <div className="relative w-full max-w-[300px] aspect-[9/18] rounded-2xl overflow-hidden shadow-lg border-4 border-muted bg-black">
+                {!remoteControlEnabled ? (
+                    <Image
+                        src="https://placehold.co/400x800.png"
+                        alt="Live device screen"
+                        fill
+                        className="object-cover"
+                        data-ai-hint="building architecture"
+                    />
+                ) : (
+                    <InteractivePhoneScreen />
                 )}
             </div>
         </div>
