@@ -1,11 +1,12 @@
+
 "use client"
 
 import * as React from "react"
 import { DeviceStatusCard } from "@/components/device-status-card"
 import { KeyMetricCard } from "@/components/key-metric-card"
 import { ActivityFeed } from "@/components/activity-feed"
-import { RemoteControl } from "@/components/remote-control"
 import { AlertTriangle, Hourglass, ShieldCheck } from "lucide-react"
+import { ScreenTimeChart } from "@/components/screen-time-chart"
 
 export default function DashboardPage() {
   return (
@@ -35,7 +36,7 @@ export default function DashboardPage() {
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
             <ActivityFeed />
-            <RemoteControl />
+            <ScreenTimeChart />
         </div>
       </div>
     </main>
