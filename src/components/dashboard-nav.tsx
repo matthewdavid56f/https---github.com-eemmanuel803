@@ -37,7 +37,7 @@ export function DashboardNav() {
       <SidebarHeader className="h-14">
         <Link href="/" className="flex items-center gap-2">
           <Logo className="size-8 text-primary" />
-          <span className="text-lg font-semibold text-primary-foreground">Synthetic Eyes</span>
+          <span className="text-lg font-semibold text-foreground group-data-[collapsible=icon]:hidden">Synthetic Eyes</span>
         </Link>
       </SidebarHeader>
 
@@ -52,7 +52,7 @@ export function DashboardNav() {
               >
                 <Link href={item.href}>
                   {item.icon}
-                  {item.label}
+                  <span>{item.label}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

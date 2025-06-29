@@ -59,7 +59,7 @@ export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }:
             <p className="text-lg font-bold">{selectedChild.name}'s Phone</p>
             <div className="flex items-center text-xs text-muted-foreground">
               {selectedChild.isOnline ? (
-                 <Badge variant="outline" className="mr-2 border-green-500 bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400">Online</Badge>
+                 <Badge variant="outline" className="mr-2 border-green-600 bg-green-50 text-green-700">Online</Badge>
               ) : (
                  <Badge variant="outline" className="mr-2 border-muted-foreground bg-muted">Offline</Badge>
               )}
