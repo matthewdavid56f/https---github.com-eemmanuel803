@@ -8,19 +8,57 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { useChild } from "@/contexts/child-context"
 import { ShieldAlert, Globe, Send, Loader2 } from "lucide-react"
+import { sendDeviceCommand, type DeviceCommandInput } from "@/ai/flows/device-commands"
+
+type LoadingStates = {
+  lock30?: boolean;
+  lock60?: boolean;
+  lock120?: boolean;
+  unlock?: boolean;
+  message?: boolean;
+  website?: boolean;
+}
 
 export default function DeviceControlsPage() {
   const { toast } = useToast()
-  const { selectedChild, isLoading } = useChild()
+  const { selectedChild, isLoading: isChildLoading } = useChild()
+  const [loading, setLoading] = React.useState<LoadingStates>({})
+  const [message, setMessage] = React.useState("")
+  const [url, setUrl] = React.useState("https://google.com")
 
-  const handleAction = (message: string) => {
-    toast({
-      title: "Command Sent",
-      description: message,
-    })
+  const handleCommand = async (command: DeviceCommandInput['command'], payload: DeviceCommandInput['payload'], loadingKey: keyof LoadingStates) => {
+    if (!selectedChild) return;
+
+    setLoading(prev => ({ ...prev, [loadingKey]: true }))
+
+    try {
+      const input: DeviceCommandInput = {
+        childName: selectedChild.name,
+        command,
+        payload,
+      }
+      const result = await sendDeviceCommand(input)
+      if (result.success) {
+        toast({
+          title: "Command Sent",
+          description: result.message,
+        })
+      } else {
+        throw new Error(result.message)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send command. Please try again.",
+        variant: "destructive"
+      })
+      console.error(error)
+    } finally {
+      setLoading(prev => ({ ...prev, [loadingKey]: false }))
+    }
   }
-
-  if (isLoading || !selectedChild) {
+  
+  if (isChildLoading || !selectedChild) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
   }
 
@@ -46,10 +84,18 @@ export default function DeviceControlsPage() {
               Temporarily disable the phone for a set duration. The user will not be able to use it.
             </p>
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="destructive" onClick={() => handleAction(`Device locked for 30 minutes for ${selectedChild.name}.`)}>30 Mins</Button>
-              <Button variant="destructive" onClick={() => handleAction(`Device locked for 1 hour for ${selectedChild.name}.`)}>1 Hour</Button>
-              <Button variant="destructive" onClick={() => handleAction(`Device locked for 2 hours for ${selectedChild.name}.`)}>2 Hours</Button>
-              <Button className="bg-green-600 hover:bg-green-700 text-primary-foreground" onClick={() => handleAction(`Device unlocked for ${selectedChild.name}.`)}>Unlock Now</Button>
+              <Button variant="destructive" onClick={() => handleCommand('lock', { duration: '30 minutes' }, 'lock30')} disabled={loading.lock30}>
+                {loading.lock30 ? <Loader2 className="animate-spin" /> : "30 Mins"}
+              </Button>
+              <Button variant="destructive" onClick={() => handleCommand('lock', { duration: '1 hour' }, 'lock60')} disabled={loading.lock60}>
+                {loading.lock60 ? <Loader2 className="animate-spin" /> : "1 Hour"}
+              </Button>
+              <Button variant="destructive" onClick={() => handleCommand('lock', { duration: '2 hours' }, 'lock120')} disabled={loading.lock120}>
+                {loading.lock120 ? <Loader2 className="animate-spin" /> : "2 Hours"}
+              </Button>
+              <Button className="bg-green-600 hover:bg-green-700 text-primary-foreground" onClick={() => handleCommand('unlock', {}, 'unlock')} disabled={loading.unlock}>
+                {loading.unlock ? <Loader2 className="animate-spin" /> : "Unlock Now"}
+              </Button>
             </div>
           </div>
           <div className="space-y-4">
@@ -58,9 +104,9 @@ export default function DeviceControlsPage() {
               Send a message that will appear on top of whatever the user is doing.
             </p>
             <div className="space-y-2">
-              <Input placeholder="e.g., Dinner is ready!" />
-              <Button variant="secondary" className="w-full justify-center" onClick={() => handleAction(`Popup message sent to ${selectedChild.name}.`)}>
-                <Send className="mr-2 h-4 w-4" />
+              <Input placeholder="e.g., Dinner is ready!" value={message} onChange={(e) => setMessage(e.target.value)} disabled={loading.message} />
+              <Button variant="secondary" className="w-full justify-center" onClick={() => handleCommand('sendMessage', { message }, 'message')} disabled={loading.message || !message}>
+                {loading.message ? <Loader2 className="animate-spin" /> : <Send />}
                 Send Message
               </Button>
             </div>
@@ -75,10 +121,10 @@ export default function DeviceControlsPage() {
               Remotely open a specific website in the device's browser.
             </p>
              <div className="space-y-2">
-              <Input defaultValue="https://google.com" />
-              <Button className="w-full justify-center" onClick={() => handleAction(`Force open website command sent to ${selectedChild.name}.`)}>
-                <Globe className="mr-2 h-4 w-4" />
-                Open Website
+              <Input value={url} onChange={(e) => setUrl(e.target.value)} disabled={loading.website} />
+              <Button className="w-full justify-center" onClick={() => handleCommand('openWebsite', { url }, 'website')} disabled={loading.website || !url}>
+                 {loading.website ? <Loader2 className="animate-spin" /> : <Globe />}
+                 Open Website
               </Button>
             </div>
         </div>
