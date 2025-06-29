@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { Video, Monitor, Camera, Image as ImageIcon, Mic, ShieldCheck, ShieldOff } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default function LiveViewPage() {
   const [remoteControlEnabled, setRemoteControlEnabled] = React.useState(false)
@@ -47,9 +48,19 @@ export default function LiveViewPage() {
                     src="https://placehold.co/400x800.png"
                     alt="Live device screen"
                     fill
-                    className="object-cover"
+                    className={cn(
+                        "object-cover transition-all",
+                        remoteControlEnabled && "blur-sm brightness-50"
+                    )}
                     data-ai-hint="building architecture"
                 />
+                {remoteControlEnabled && (
+                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
+                        <ShieldCheck className="w-16 h-16 text-green-500 mb-4 animate-pulse" />
+                        <h2 className="text-2xl font-bold text-white">Remote Control Active</h2>
+                        <p className="text-white/80 mt-2">The device screen is now blank. You have full control.</p>
+                    </div>
+                )}
             </div>
         </div>
 
@@ -101,7 +112,7 @@ export default function LiveViewPage() {
                 </Button>
               )}
               <p className="text-xs text-muted-foreground text-center px-4">
-                Sends a command to enable or disable remote access. The device agent handles the screen blanking.
+                Enabling remote control will blank the child's screen and give you full access to operate the device.
               </p>
             </div>
           </div>
