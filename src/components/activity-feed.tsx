@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -10,13 +11,25 @@ import {
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { FileImage, ShieldAlert, Smartphone, ClipboardCopy } from "lucide-react"
+import { Badge } from "./ui/badge"
 
-const activities = [
+export type Activity = {
+  icon: React.ReactNode,
+  title: string,
+  description: string,
+  time: string,
+  details?: {
+    source: string,
+    reason: string,
+    isHarmful: boolean
+  },
+  badge?: React.ReactNode
+}
+
+export const mockActivities: Activity[] = [
   {
     icon: <ShieldAlert className="size-5 text-destructive" />,
     title: "Harmful Content Detected",
@@ -62,7 +75,12 @@ const activities = [
   },
 ];
 
-export function ActivityFeed() {
+interface ActivityFeedProps {
+  activities: Activity[];
+}
+
+
+export function ActivityFeed({ activities }: ActivityFeedProps) {
   return (
     <Card className="h-full">
       <CardHeader>
@@ -100,6 +118,11 @@ export function ActivityFeed() {
                 {activity.badge && <div>{activity.badge}</div>}
               </div>
             ))}
+             {activities.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>No recent activity.</p>
+              </div>
+            )}
           </div>
         </ScrollArea>
       </CardContent>

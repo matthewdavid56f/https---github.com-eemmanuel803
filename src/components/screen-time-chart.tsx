@@ -16,14 +16,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-const chartData = [
-  { app: "YouTube", minutes: 125, fill: "var(--color-youtube)" },
-  { app: "TikTok", minutes: 90, fill: "var(--color-tiktok)" },
-  { app: "Minecraft", minutes: 60, fill: "var(--color-minecraft)" },
-  { app: "Chrome", minutes: 45, fill: "var(--color-chrome)" },
-  { app: "Instagram", minutes: 32, fill: "var(--color-instagram)" },
-  { app: "Other", minutes: 20, fill: "var(--color-other)" },
-]
+export type ScreenTimeData = { app: string; minutes: number; fill: string }[]
 
 const chartConfig = {
   minutes: {
@@ -53,9 +46,29 @@ const chartConfig = {
     label: "Other",
     color: "hsl(var(--muted))",
   },
+  roblox: {
+    label: "Roblox",
+    color: "hsl(var(--chart-1))",
+  },
+  messages: {
+    label: "Messages",
+    color: "hsl(var(--chart-3))",
+  },
+  safari: {
+    label: "Safari",
+    color: "hsl(var(--chart-4))",
+  },
+  facetime: {
+    label: "FaceTime",
+    color: "hsl(var(--chart-3))",
+  }
 } satisfies ChartConfig
 
-export function ScreenTimeChart() {
+interface ScreenTimeChartProps {
+  chartData: ScreenTimeData;
+}
+
+export function ScreenTimeChart({ chartData }: ScreenTimeChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -81,7 +94,7 @@ export function ScreenTimeChart() {
               tickMargin={10}
               axisLine={false}
               tickFormatter={(value) =>
-                chartConfig[value as keyof typeof chartConfig]?.label
+                chartConfig[value.toLowerCase() as keyof typeof chartConfig]?.label
               }
             />
             <XAxis dataKey="minutes" type="number" hide />
