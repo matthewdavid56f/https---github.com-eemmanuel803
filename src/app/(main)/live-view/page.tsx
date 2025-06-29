@@ -7,15 +7,17 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { Video, Monitor, Camera, Image as ImageIcon, Mic, ShieldCheck, ShieldOff } from "lucide-react"
 import { InteractivePhoneScreen } from "@/components/interactive-phone-screen"
+import { useChild } from "@/contexts/child-context"
 
 export default function LiveViewPage() {
   const [remoteControlEnabled, setRemoteControlEnabled] = React.useState(false)
   const { toast } = useToast()
+  const { selectedChild } = useChild()
 
   const handleAction = (message: string) => {
     toast({
       title: "Command Sent",
-      description: message,
+      description: `${message} for ${selectedChild.name}.`,
     })
   }
   
@@ -24,7 +26,7 @@ export default function LiveViewPage() {
     setRemoteControlEnabled(!wasEnabled)
     toast({
       title: "Command Sent",
-      description: `Remote control has been ${!wasEnabled ? 'enabled' : 'disabled'}.`,
+      description: `Remote control has been ${!wasEnabled ? 'enabled' : 'disabled'} for ${selectedChild.name}.`,
     })
   }
 
@@ -37,7 +39,7 @@ export default function LiveViewPage() {
             </div>
           <div>
             <h1 className="text-2xl font-bold">Live View &amp; Remote Control</h1>
-            <p className="text-muted-foreground">Watch the screen, access cameras, and operate the device remotely.</p>
+            <p className="text-muted-foreground">Watch {selectedChild.name}'s screen, access cameras, and operate the device remotely.</p>
           </div>
         </div>
       </header>
@@ -47,7 +49,7 @@ export default function LiveViewPage() {
                 {!remoteControlEnabled ? (
                     <Image
                         src="https://placehold.co/400x800.png"
-                        alt="Live device screen"
+                        alt={`Live screen of ${selectedChild.name}'s device`}
                         fill
                         className="object-cover"
                         data-ai-hint="building architecture"
@@ -62,13 +64,13 @@ export default function LiveViewPage() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Live Feeds</h3>
             <div className="space-y-3">
-              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Live screen feed requested.")}>
+              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Live screen feed requested")}>
                 <Monitor className="mr-3 h-5 w-5" /> Live Screen
               </Button>
-              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Front camera feed requested.")}>
+              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Front camera feed requested")}>
                 <Camera className="mr-3 h-5 w-5" /> Front Camera
               </Button>
-              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Back camera feed requested.")}>
+              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Back camera feed requested")}>
                 <Camera className="mr-3 h-5 w-5" /> Back Camera
               </Button>
             </div>
@@ -77,10 +79,10 @@ export default function LiveViewPage() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Actions</h3>
             <div className="space-y-3">
-              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Screenshot command sent.")}>
+              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Screenshot command sent")}>
                 <ImageIcon className="mr-3 h-5 w-5" /> Take Screenshot
               </Button>
-              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Microphone recording (30s) command sent.")}>
+              <Button className="w-full justify-start text-base py-6" onClick={() => handleAction("Microphone recording (30s) command sent")}>
                 <Mic className="mr-3 h-5 w-5" /> Record Microphone (30s)
               </Button>
             </div>

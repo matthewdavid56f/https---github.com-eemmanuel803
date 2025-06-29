@@ -14,35 +14,25 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-import { MapPin, RefreshCw, Home, School, PlusCircle } from "lucide-react"
-
-type Geofence = {
-  name: string;
-  address: string;
-  icon: React.ReactNode;
-  isInside: boolean;
-}
-
-const mockGeofences: Geofence[] = [
-  { name: 'Home', address: '123 Maple Street, Springfield', icon: <Home className="w-6 h-6 text-green-500" />, isInside: true },
-  { name: 'School', address: '456 Oak Avenue, Springfield', icon: <School className="w-6 h-6 text-blue-500" />, isInside: false },
-]
+import { MapPin, RefreshCw, PlusCircle } from "lucide-react"
+import { useChild } from "@/contexts/child-context"
 
 export default function LocationPage() {
   const { toast } = useToast()
+  const { selectedChild } = useChild()
   const [isRefreshing, setIsRefreshing] = React.useState(false)
 
   const handleRefresh = () => {
     setIsRefreshing(true)
     toast({
       title: "Command Sent",
-      description: "Requesting updated location from device...",
+      description: `Requesting updated location from ${selectedChild.name}'s device...`,
     })
     setTimeout(() => {
         setIsRefreshing(false)
         toast({
             title: "Location Updated",
-            description: "Device location has been successfully updated.",
+            description: `${selectedChild.name}'s device location has been successfully updated.`,
         })
     }, 2000)
   }
@@ -63,7 +53,7 @@ export default function LocationPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Location Tracking</h1>
-            <p className="text-muted-foreground">See the device's current location and manage safe zones.</p>
+            <p className="text-muted-foreground">See {selectedChild.name}'s current location and manage safe zones.</p>
           </div>
         </div>
       </header>
@@ -72,15 +62,15 @@ export default function LocationPage() {
             <Card className="h-full min-h-[400px] lg:min-h-0">
                 <CardContent className="p-0 h-full relative">
                     <Image
-                        src="https://placehold.co/800x600.png"
-                        alt="Map showing device location"
+                        src={selectedChild.location.mapImage}
+                        alt={`Map showing ${selectedChild.name}'s device location`}
                         fill
                         className="object-cover rounded-lg"
                         data-ai-hint="map city"
                     />
                     <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-lg shadow-lg backdrop-blur-sm">
-                        <p className="font-bold text-sm">Alex's Phone</p>
-                        <p className="text-xs text-muted-foreground">Last updated: 2 mins ago</p>
+                        <p className="font-bold text-sm">{selectedChild.name}'s Phone</p>
+                        <p className="text-xs text-muted-foreground">Last updated: {selectedChild.location.lastUpdated}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -95,11 +85,11 @@ export default function LocationPage() {
             <CardContent className="space-y-4">
                <div>
                    <p className="text-sm font-medium">Address</p>
-                   <p className="text-muted-foreground">123 Maple Street, Springfield, USA</p>
+                   <p className="text-muted-foreground">{selectedChild.location.address}</p>
                </div>
                <div>
                    <p className="text-sm font-medium">Coordinates</p>
-                   <p className="text-muted-foreground font-mono text-xs">40.7128° N, 74.0060° W</p>
+                   <p className="text-muted-foreground font-mono text-xs">{selectedChild.location.coordinates}</p>
                </div>
                <Button className="w-full" onClick={handleRefresh} disabled={isRefreshing}>
                  <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -115,7 +105,7 @@ export default function LocationPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                <ul className="space-y-4">
-                   {mockGeofences.map(zone => (
+                   {selectedChild.geofences.map(zone => (
                        <li key={zone.name} className="flex items-center gap-4">
                            {zone.icon}
                            <div className="flex-1">

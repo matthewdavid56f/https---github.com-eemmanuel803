@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+import { useChild } from "@/contexts/child-context"
 import { ShieldAlert, Globe, Send } from "lucide-react"
 
 export default function DeviceControlsPage() {
   const { toast } = useToast()
+  const { selectedChild } = useChild()
 
   const handleAction = (message: string) => {
     toast({
@@ -26,7 +28,7 @@ export default function DeviceControlsPage() {
             <ShieldAlert className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Device Controls</h1>
+            <h1 className="text-2xl font-bold">Device Controls for {selectedChild.name}</h1>
             <p className="text-muted-foreground">Send commands to remotely lock the phone, send alerts, and force open websites.</p>
           </div>
         </div>
@@ -40,10 +42,10 @@ export default function DeviceControlsPage() {
               Temporarily disable the phone for a set duration. The user will not be able to use it.
             </p>
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="destructive" onClick={() => handleAction("Device locked for 30 minutes.")}>30 Mins</Button>
-              <Button variant="destructive" onClick={() => handleAction("Device locked for 1 hour.")}>1 Hour</Button>
-              <Button variant="destructive" onClick={() => handleAction("Device locked for 2 hours.")}>2 Hours</Button>
-              <Button className="bg-green-600 hover:bg-green-700 text-primary-foreground" onClick={() => handleAction("Device unlocked.")}>Unlock Now</Button>
+              <Button variant="destructive" onClick={() => handleAction(`Device locked for 30 minutes for ${selectedChild.name}.`)}>30 Mins</Button>
+              <Button variant="destructive" onClick={() => handleAction(`Device locked for 1 hour for ${selectedChild.name}.`)}>1 Hour</Button>
+              <Button variant="destructive" onClick={() => handleAction(`Device locked for 2 hours for ${selectedChild.name}.`)}>2 Hours</Button>
+              <Button className="bg-green-600 hover:bg-green-700 text-primary-foreground" onClick={() => handleAction(`Device unlocked for ${selectedChild.name}.`)}>Unlock Now</Button>
             </div>
           </div>
           <div className="space-y-4">
@@ -53,7 +55,7 @@ export default function DeviceControlsPage() {
             </p>
             <div className="space-y-2">
               <Input placeholder="e.g., Dinner is ready!" />
-              <Button variant="secondary" className="w-full justify-center" onClick={() => handleAction("Popup message sent.")}>
+              <Button variant="secondary" className="w-full justify-center" onClick={() => handleAction(`Popup message sent to ${selectedChild.name}.`)}>
                 <Send className="mr-2 h-4 w-4" />
                 Send Message
               </Button>
@@ -70,7 +72,7 @@ export default function DeviceControlsPage() {
             </p>
              <div className="space-y-2">
               <Input defaultValue="https://google.com" />
-              <Button className="w-full justify-center" onClick={() => handleAction("Force open website command sent.")}>
+              <Button className="w-full justify-center" onClick={() => handleAction(`Force open website command sent to ${selectedChild.name}.`)}>
                 <Globe className="mr-2 h-4 w-4" />
                 Open Website
               </Button>

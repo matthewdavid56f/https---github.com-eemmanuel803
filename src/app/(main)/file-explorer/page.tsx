@@ -24,54 +24,9 @@ import {
 } from "@/components/ui/avatar"
 import { useToast } from "@/hooks/use-toast"
 import { Folder as FolderIcon, File as FileIcon, FileImage, FileVideo, FileText, Music, ArrowLeft, RefreshCw, Download } from "lucide-react"
+import type { FileSystemItem } from "@/contexts/child-context"
+import { useChild } from "@/contexts/child-context"
 
-type FileSystemItem = {
-  name: string
-  type: 'folder' | 'file'
-  fileType?: 'image' | 'video' | 'audio' | 'document' | 'other'
-  size?: string
-  modified?: string
-  thumbnail?: string
-  hint?: string
-}
-
-const mockFileSystem: Record<string, FileSystemItem[]> = {
-  '/': [
-    { name: 'DCIM', type: 'folder' },
-    { name: 'Download', type: 'folder' },
-    { name: 'Pictures', type: 'folder' },
-    { name: 'Music', type: 'folder' },
-    { name: 'Documents', type: 'folder' },
-  ],
-  '/DCIM': [
-    { name: 'Camera', type: 'folder' },
-  ],
-  '/DCIM/Camera': [
-    { name: 'IMG_20240520.jpg', type: 'file', fileType: 'image', size: '4.5 MB', modified: '2024-05-20 10:30', thumbnail: 'https://placehold.co/40x40.png', hint: 'beach sunset' },
-    { name: 'IMG_20240521.jpg', type: 'file', fileType: 'image', size: '5.1 MB', modified: '2024-05-21 11:45', thumbnail: 'https://placehold.co/40x40.png', hint: 'family portrait' },
-    { name: 'VID_20240522.mp4', type: 'file', fileType: 'video', size: '55.2 MB', modified: '2024-05-22 15:20' },
-  ],
-  '/Download': [
-    { name: 'homework.pdf', type: 'file', fileType: 'document', size: '1.2 MB', modified: '2024-05-15 09:00' },
-    { name: 'song.mp3', type: 'file', fileType: 'audio', size: '3.8 MB', modified: '2024-05-14 18:00' },
-    { name: 'archive.zip', type: 'file', fileType: 'other', size: '12.3 MB', modified: '2024-05-18 20:00' },
-  ],
-  '/Pictures': [
-      { name: 'Screenshots', type: 'folder' },
-      { name: 'vacation.jpg', type: 'file', fileType: 'image', size: '3.2 MB', modified: '2024-05-01 14:00', thumbnail: 'https://placehold.co/40x40.png', hint: 'mountain landscape' },
-  ],
-  '/Pictures/Screenshots': [
-      { name: 'Screenshot_20240519.png', type: 'file', fileType: 'image', size: '1.8 MB', modified: '2024-05-19 12:00', thumbnail: 'https://placehold.co/40x40.png', hint: 'app interface' },
-  ],
-   '/Music': [
-    { name: 'lofi-beats.mp3', type: 'file', fileType: 'audio', size: '4.1 MB', modified: '2024-05-10 11:00' },
-    { name: 'rock-anthem.wav', type: 'file', fileType: 'audio', size: '10.5 MB', modified: '2024-05-11 12:00' },
-  ],
-  '/Documents': [
-    { name: 'School Project.docx', type: 'file', fileType: 'document', size: '256 KB', modified: '2024-05-17 19:30'},
-    { name: 'Book Report.txt', type: 'file', fileType: 'document', size: '12 KB', modified: '2024-05-16 14:00'},
-  ]
-}
 
 const getFileIcon = (item: FileSystemItem) => {
     if (item.type === 'folder') {
@@ -89,6 +44,7 @@ const getFileIcon = (item: FileSystemItem) => {
 
 export default function FileExplorerPage() {
   const { toast } = useToast()
+  const { selectedChild } = useChild()
   const [currentPath, setCurrentPath] = React.useState('/')
   const [history, setHistory] = React.useState<string[]>(['/'])
 
@@ -114,10 +70,10 @@ export default function FileExplorerPage() {
   }
   
   const handleDownload = (itemName: string) => {
-      toast({ title: "Command Sent", description: `Downloading ${itemName}...` })
+      toast({ title: "Command Sent", description: `Downloading ${itemName} from ${selectedChild.name}'s device...` })
   }
 
-  const currentItems = mockFileSystem[currentPath] || []
+  const currentItems = selectedChild.fileSystem[currentPath] || []
 
   return (
     <div className="flex flex-1 flex-col h-full">
@@ -128,7 +84,7 @@ export default function FileExplorerPage() {
                     <FolderIcon className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold">File Explorer</h1>
+                    <h1 className="text-2xl font-bold">{selectedChild.name}'s File Explorer</h1>
                     <p className="text-muted-foreground">Browse files and folders on the device.</p>
                 </div>
             </div>

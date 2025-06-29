@@ -25,37 +25,23 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-
-type App = {
-  name: string;
-  icon: React.ReactNode;
-  version: string;
-  packageName: string;
-}
-
-const mockApps: App[] = [
-  { name: 'Google Chrome', packageName: 'com.android.chrome', icon: <Globe className="w-8 h-8 text-muted-foreground" />, version: '125.0.6422.112' },
-  { name: 'YouTube', packageName: 'com.google.android.youtube', icon: <Youtube className="w-8 h-8 text-red-500" />, version: '19.23.35' },
-  { name: 'Instagram', packageName: 'com.instagram.android', icon: <Instagram className="w-8 h-8 text-pink-500" />, version: '339.0.0.12.112' },
-  { name: 'Minecraft', packageName: 'com.mojang.minecraftpe', icon: <Gamepad2 className="w-8 h-8 text-green-600" />, version: '1.20.81.01' },
-  { name: 'TikTok', packageName: 'com.zhiliaoapp.musically', icon: <Music className="w-8 h-8 text-cyan-400" />, version: '34.8.4' },
-  { name: 'Clash of Clans', packageName: 'com.supercell.clashofclans', icon: <Shield className="w-8 h-8 text-yellow-500" />, version: '16.253.20' },
-]
+import { useChild } from "@/contexts/child-context"
+import type { App } from "@/contexts/child-context"
 
 export default function AppSettingsPage() {
   const { toast } = useToast()
+  const { selectedChild } = useChild()
   const [selectedApp, setSelectedApp] = React.useState<App | null>(null)
   const [timerMinutes, setTimerMinutes] = React.useState("15")
 
   const handleOpenApp = (appName: string) => {
     toast({
       title: "Command Sent",
-      description: `Opening ${appName} on the device.`,
+      description: `Opening ${appName} on ${selectedChild.name}'s device.`,
     })
   }
   
@@ -63,7 +49,7 @@ export default function AppSettingsPage() {
      if (selectedApp) {
       toast({
         title: "Command Sent",
-        description: `${selectedApp.name} has been pinned. The user cannot exit the app.`,
+        description: `${selectedApp.name} has been pinned on ${selectedChild.name}'s device. The user cannot exit the app.`,
       })
       setSelectedApp(null);
     }
@@ -73,7 +59,7 @@ export default function AppSettingsPage() {
     if (selectedApp) {
       toast({
         title: "Command Sent",
-        description: `${selectedApp.name} has been pinned for ${timerMinutes} minutes.`,
+        description: `${selectedApp.name} has been pinned for ${timerMinutes} minutes on ${selectedChild.name}'s device.`,
       })
       setSelectedApp(null);
     }
@@ -86,7 +72,7 @@ export default function AppSettingsPage() {
           <div className="flex items-center gap-4">
               <Settings className="w-8 h-8 text-primary" />
               <div>
-                  <h1 className="text-2xl font-bold">Application Settings</h1>
+                  <h1 className="text-2xl font-bold">{selectedChild.name}'s Application Settings</h1>
                   <p className="text-muted-foreground">View installed apps and send commands to open or pin them.</p>
               </div>
           </div>
@@ -111,7 +97,7 @@ export default function AppSettingsPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {mockApps.map((app) => (
+                        {selectedChild.installedApps.map((app) => (
                             <TableRow key={app.packageName}>
                                 <TableCell>
                                     <div className="flex items-center gap-4">

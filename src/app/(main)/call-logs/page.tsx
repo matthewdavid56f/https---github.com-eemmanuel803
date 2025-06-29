@@ -18,25 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Phone as PhoneIcon, RefreshCw, ArrowDownLeft, ArrowUpRight, PhoneMissed } from "lucide-react"
-
-type CallLog = {
-  id: string;
-  name: string;
-  number: string;
-  type: 'incoming' | 'outgoing' | 'missed';
-  duration: string;
-  time: string;
-}
-
-const mockCallLogs: CallLog[] = [
-  { id: '1', name: 'Alex Johnson', number: '555-0103', type: 'outgoing', duration: '5m 12s', time: '10:45 AM' },
-  { id: '2', name: 'Mom', number: '555-0101', type: 'incoming', duration: '12m 3s', time: '10:30 AM' },
-  { id: '3', name: 'Unknown', number: '555-0123', type: 'missed', duration: '0m 0s', time: '9:15 AM' },
-  { id: '4', name: 'Dad', number: '555-0102', type: 'outgoing', duration: '1m 45s', time: 'Yesterday' },
-  { id: '5', name: 'Pizza Palace', number: '555-0199', type: 'outgoing', duration: '2m 30s', time: 'Yesterday' },
-  { id: '6', name: 'Dr. Smith (Pediatrician)', number: '555-0104', type: 'incoming', duration: '8m 5s', time: '2 days ago' },
-  { id: '7', name: 'Emily Carter', number: '555-0107', type: 'missed', duration: '0m 0s', time: '2 days ago' },
-]
+import { useChild } from "@/contexts/child-context"
 
 const callTypeDetails = {
   incoming: { icon: ArrowDownLeft, color: 'text-green-500', label: 'Incoming' },
@@ -46,6 +28,7 @@ const callTypeDetails = {
 
 export default function CallLogsPage() {
     const [isLoading, setIsLoading] = React.useState(false)
+    const { selectedChild } = useChild()
 
     const handleRefresh = () => {
         setIsLoading(true)
@@ -60,7 +43,7 @@ export default function CallLogsPage() {
                 <PhoneIcon className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Call Logs</h1>
+              <h1 className="text-2xl font-bold">{selectedChild.name}'s Call Logs</h1>
               <p className="text-muted-foreground">View the device's call history.</p>
             </div>
           </div>
@@ -86,7 +69,7 @@ export default function CallLogsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockCallLogs.map((log) => {
+                {selectedChild.callLogs.map((log) => {
                   const details = callTypeDetails[log.type];
                   const Icon = details.icon;
                   return (

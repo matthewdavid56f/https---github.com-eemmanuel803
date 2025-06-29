@@ -5,15 +5,13 @@ import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { MessageSquare, RefreshCw, Loader2, Send, Info } from "lucide-react"
+import { MessageSquare, RefreshCw, Loader2, Send } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -31,55 +29,19 @@ import {
   Avatar,
   AvatarFallback,
 } from "@/components/ui/avatar"
+import { useChild } from "@/contexts/child-context"
+import type { SmsMessage } from "@/contexts/child-context"
 
 const messageSchema = z.object({
   recipient: z.string().min(1, { message: "Recipient phone number is required." }),
   message: z.string().min(1, { message: "Message cannot be empty." }),
 })
 
-const mockMessages = [
-    {
-        id: '1',
-        sender: 'Alex',
-        content: "Hey, are we still on for the movies tonight?",
-        timestamp: "5min ago",
-        avatar: "A"
-    },
-    {
-        id: '2',
-        sender: 'Mom',
-        content: "Don't forget to take out the trash before you leave!",
-        timestamp: "1hr ago",
-        avatar: "M"
-    },
-    {
-        id: '3',
-        sender: '+1-555-0103',
-        content: "Your verification code is 123456.",
-        timestamp: "3hr ago",
-        avatar: "#"
-    },
-    {
-        id: '4',
-        sender: 'Alex',
-        content: "I'll be there around 7 PM.",
-        timestamp: "yesterday",
-        avatar: "A"
-    },
-    {
-        id: '5',
-        sender: 'Dad',
-        content: "Can you call me back when you get a chance?",
-        timestamp: "yesterday",
-        avatar: "D"
-    }
-]
-
-
 export default function SmsMessagesPage() {
   const [isLoading, setIsLoading] = React.useState(true)
-  const [messages, setMessages] = React.useState<typeof mockMessages>([])
+  const [messages, setMessages] = React.useState<SmsMessage[]>([])
   const { toast } = useToast()
+  const { selectedChild } = useChild()
 
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
@@ -92,10 +54,10 @@ export default function SmsMessagesPage() {
   const fetchMessages = React.useCallback(() => {
     setIsLoading(true)
     setTimeout(() => {
-      setMessages(mockMessages)
+      setMessages(selectedChild.smsMessages)
       setIsLoading(false)
-    }, 2000)
-  }, [])
+    }, 1200)
+  }, [selectedChild])
 
   React.useEffect(() => {
     fetchMessages()
@@ -105,7 +67,7 @@ export default function SmsMessagesPage() {
     console.log(values)
     toast({
       title: "Command Sent",
-      description: `Message queued to be sent to ${values.recipient}.`,
+      description: `Message queued to be sent to ${values.recipient} from ${selectedChild.name}'s device.`,
     })
     form.reset()
   }
@@ -119,7 +81,7 @@ export default function SmsMessagesPage() {
                     <MessageSquare className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold">SMS Messages</h1>
+                    <h1 className="text-2xl font-bold">{selectedChild.name}'s SMS Messages</h1>
                     <p className="text-muted-foreground">Read messages and issue commands to send new ones.</p>
                 </div>
             </div>
