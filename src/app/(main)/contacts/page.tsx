@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 import { Users, RefreshCw, Phone, MessageSquare, Search } from "lucide-react"
+import { useChild } from "@/contexts/child-context"
 
 type Contact = {
   name: string
@@ -47,6 +48,7 @@ const mockContacts: Contact[] = [
 export default function ContactsPage() {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = React.useState("")
+  const { selectedChild } = useChild()
 
   const handleAction = (message: string) => {
     toast({
@@ -68,7 +70,7 @@ export default function ContactsPage() {
             <Users className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Contacts</h1>
+            <h1 className="text-2xl font-bold">{selectedChild.name}'s Contacts</h1>
             <p className="text-muted-foreground">View and manage the device's contacts.</p>
           </div>
         </div>
