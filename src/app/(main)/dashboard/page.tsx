@@ -5,7 +5,7 @@ import * as React from "react"
 import { DeviceStatusCard } from "@/components/device-status-card"
 import { KeyMetricCard } from "@/components/key-metric-card"
 import { ActivityFeed, Activity } from "@/components/activity-feed"
-import { AlertTriangle, Hourglass, ShieldCheck, Loader2 } from "lucide-react"
+import { AlertTriangle, Hourglass, ShieldCheck, Loader2, ShieldAlert } from "lucide-react"
 import { ScreenTimeChart } from "@/components/screen-time-chart"
 import { useChild } from "@/contexts/child-context"
 import { analyzeContent, AnalyzeContentInput } from "@/ai/flows/analyze-content"
@@ -29,7 +29,7 @@ export default function DashboardPage() {
         if (activity.details) {
           try {
             const input: AnalyzeContentInput = {
-              source: activity.details.source as 'screenshot' | 'clipboard' | 'notification',
+              source: activity.details.source.toLowerCase() as 'screenshot' | 'clipboard' | 'notification',
               content: `${activity.title}: ${activity.description}`,
             };
             const analysis = await analyzeContent(input);
