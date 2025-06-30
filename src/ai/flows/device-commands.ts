@@ -10,7 +10,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const DeviceCommandInputSchema = z.object({
+const DeviceCommandInputSchema = z.object({
   childName: z.string().describe("The name of the child whose device will receive the command."),
   command: z.enum(['lock', 'unlock', 'sendMessage', 'openWebsite', 'openApp', 'pinApp', 'sendSms']).describe('The type of command to send.'),
   payload: z.object({
@@ -24,7 +24,7 @@ export const DeviceCommandInputSchema = z.object({
 });
 export type DeviceCommandInput = z.infer<typeof DeviceCommandInputSchema>;
 
-export const DeviceCommandOutputSchema = z.object({
+const DeviceCommandOutputSchema = z.object({
   success: z.boolean().describe('Whether the command was successfully sent.'),
   message: z.string().describe('A confirmation message about the command status.'),
 });
