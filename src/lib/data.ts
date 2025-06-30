@@ -1,4 +1,6 @@
 
+// import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
+// import { app } from './firebase';
 import type { Activity } from "@/components/activity-feed";
 import type { ScreenTimeData } from "@/components/screen-time-chart";
 
@@ -92,6 +94,7 @@ export type ChildSummary = Pick<Child, 'id' | 'name' | 'avatar' | 'deviceName' |
 
 
 // Centralized mock data
+// In a real app, this data would live in your Firestore database.
 const childrenData: Child[] = [
     {
     id: 'alex',
@@ -320,10 +323,21 @@ const childrenData: Child[] = [
   }
 ];
 
+// In a real app, the functions below would be async and would
+// fetch data from Firestore instead of returning mock data.
+// Example:
+// const db = getFirestore(app);
+
 // Simulate an async API call
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function getChildren(): Promise<ChildSummary[]> {
+  // Real implementation would be:
+  // const childrenCol = collection(db, 'children');
+  // const childrenSnapshot = await getDocs(childrenCol);
+  // const childrenList = childrenSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChildSummary));
+  // return childrenList;
+
   await delay(500); // Simulate network latency
   return childrenData.map(({ id, name, avatar, deviceName, isOnline, batteryLevel }) => ({
     id,
@@ -336,6 +350,15 @@ export async function getChildren(): Promise<ChildSummary[]> {
 }
 
 export async function getChildById(id: string): Promise<Child | null> {
+  // Real implementation would be:
+  // const childDocRef = doc(db, 'children', id);
+  // const childDocSnap = await getDoc(childDocRef);
+  // if (childDocSnap.exists()) {
+  //   return { id: childDocSnap.id, ...childDocSnap.data() } as Child;
+  // } else {
+  //   return null;
+  // }
+  
   await delay(500); // Simulate network latency
   const child = childrenData.find(c => c.id === id);
   return child || null;
