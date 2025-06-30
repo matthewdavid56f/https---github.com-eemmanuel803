@@ -14,9 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Battery, Smartphone } from "lucide-react"
+import { Smartphone } from "lucide-react"
 import type { ChildSummary, Child } from "@/lib/data"
 
 interface DeviceStatusCardProps {
@@ -35,7 +33,7 @@ export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }:
           </SelectTrigger>
           <SelectContent>
             {childrenData.map(child => (
-              <SelectItem key={child.id} value={child.id}>{child.name}'s Device</SelectItem>
+              <SelectItem key={child.id} value={child.id}>{child.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -48,26 +46,12 @@ export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }:
             <AvatarFallback>{selectedChild.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-lg font-bold">{selectedChild.name}'s Phone</p>
-            <div className="flex items-center text-xs text-muted-foreground">
-              {selectedChild.isOnline ? (
-                 <Badge variant="outline" className="mr-2 border-green-600 bg-green-50 text-green-700">Online</Badge>
-              ) : (
-                 <Badge variant="outline" className="mr-2 border-muted-foreground bg-muted">Offline</Badge>
-              )}
-              <span>{selectedChild.deviceName}</span>
-            </div>
+            <p className="text-lg font-bold">{selectedChild.name}</p>
+            <p className="text-xs text-muted-foreground">Demonstration Device</p>
           </div>
         </div>
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-             <div className="flex items-center">
-              <Battery className="mr-1 h-4 w-4" />
-              <span>Battery</span>
-            </div>
-            <span className="font-semibold text-foreground">{selectedChild.batteryLevel}%</span>
-          </div>
-          <Progress value={selectedChild.batteryLevel} className="mt-1 h-2" />
+        <div className="mt-4 text-center text-sm text-muted-foreground p-4 bg-muted/50 rounded-md">
+          Connect a device to see live status and battery information.
         </div>
       </CardContent>
     </Card>
