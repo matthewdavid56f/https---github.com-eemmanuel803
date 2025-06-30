@@ -33,6 +33,7 @@ import { useChild } from "@/contexts/child-context"
 import type { App } from "@/contexts/child-context"
 import { cn } from "@/lib/utils"
 import { sendDeviceCommand, type DeviceCommandInput } from "@/ai/flows/device-commands"
+import { NoDeviceConnected } from "@/components/no-device-connected"
 
 const appIconMap: Record<string, React.ElementType> = {
   Globe,
@@ -54,7 +55,7 @@ const AppIcon = ({ name, className }: { name: string; className?: string }) => {
 
 export default function AppSettingsPage() {
   const { toast } = useToast()
-  const { selectedChild, isLoading } = useChild()
+  const { selectedChild, isSwitching } = useChild()
   const [selectedApp, setSelectedApp] = React.useState<App | null>(null)
   const [timerMinutes, setTimerMinutes] = React.useState("15")
   const [loadingCommands, setLoadingCommands] = React.useState<Record<string, boolean>>({});
@@ -99,8 +100,12 @@ export default function AppSettingsPage() {
     }
   }
   
-  if (isLoading || !selectedChild) {
+  if (isSwitching) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+
+  if (!selectedChild) {
+    return <NoDeviceConnected />;
   }
 
   const isAnyCommandLoading = Object.values(loadingCommands).some(Boolean);

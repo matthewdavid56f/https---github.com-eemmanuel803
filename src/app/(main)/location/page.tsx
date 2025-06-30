@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast"
 import { MapPin, RefreshCw, PlusCircle, Loader2, Home, School } from "lucide-react"
 import { useChild } from "@/contexts/child-context"
 import { cn } from "@/lib/utils"
+import { NoDeviceConnected } from "@/components/no-device-connected"
 
 const geofenceIconMap: Record<string, React.ElementType> = {
   Home,
@@ -31,11 +32,15 @@ const GeofenceIcon = ({ name, className }: { name: string; className?: string })
 
 export default function LocationPage() {
   const { toast } = useToast()
-  const { selectedChild, isLoading } = useChild()
+  const { selectedChild, isSwitching } = useChild()
   const [isRefreshing, setIsRefreshing] = React.useState(false)
 
-  if (isLoading || !selectedChild) {
+  if (isSwitching) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+
+  if (!selectedChild) {
+    return <NoDeviceConnected />;
   }
 
   const handleRefresh = () => {

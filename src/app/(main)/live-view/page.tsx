@@ -8,11 +8,12 @@ import { useToast } from "@/hooks/use-toast"
 import { Video, Monitor, Camera, Image as ImageIcon, Mic, ShieldCheck, ShieldOff, Loader2 } from "lucide-react"
 import { InteractivePhoneScreen } from "@/components/interactive-phone-screen"
 import { useChild } from "@/contexts/child-context"
+import { NoDeviceConnected } from "@/components/no-device-connected"
 
 export default function LiveViewPage() {
   const [remoteControlEnabled, setRemoteControlEnabled] = React.useState(false)
   const { toast } = useToast()
-  const { selectedChild, isLoading } = useChild()
+  const { selectedChild, isSwitching } = useChild()
 
   const handleAction = (message: string) => {
     if (!selectedChild) return;
@@ -32,8 +33,12 @@ export default function LiveViewPage() {
     })
   }
   
-  if (isLoading || !selectedChild) {
+  if (isSwitching) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+
+  if (!selectedChild) {
+    return <NoDeviceConnected />;
   }
 
   return (

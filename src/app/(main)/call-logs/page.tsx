@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table"
 import { Phone as PhoneIcon, RefreshCw, ArrowDownLeft, ArrowUpRight, PhoneMissed, Loader2 } from "lucide-react"
 import { useChild } from "@/contexts/child-context"
+import { NoDeviceConnected } from "@/components/no-device-connected"
 
 const callTypeDetails = {
   incoming: { icon: ArrowDownLeft, color: 'text-green-500', label: 'Incoming' },
@@ -28,15 +29,19 @@ const callTypeDetails = {
 
 export default function CallLogsPage() {
     const [isRefreshing, setIsRefreshing] = React.useState(false)
-    const { selectedChild, isLoading } = useChild()
+    const { selectedChild, isSwitching } = useChild()
 
     const handleRefresh = () => {
         setIsRefreshing(true)
         setTimeout(() => setIsRefreshing(false), 1500)
     }
 
-    if (isLoading || !selectedChild) {
+    if (isSwitching) {
       return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+    }
+
+    if (!selectedChild) {
+      return <NoDeviceConnected />;
     }
 
   return (

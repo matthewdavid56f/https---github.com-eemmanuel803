@@ -25,11 +25,12 @@ import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 import { Users, RefreshCw, Phone, MessageSquare, Search, Loader2 } from "lucide-react"
 import { useChild } from "@/contexts/child-context"
+import { NoDeviceConnected } from "@/components/no-device-connected"
 
 export default function ContactsPage() {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = React.useState("")
-  const { selectedChild, isLoading } = useChild()
+  const { selectedChild, isSwitching } = useChild()
 
   const handleAction = (message: string) => {
     toast({
@@ -38,8 +39,12 @@ export default function ContactsPage() {
     })
   }
   
-  if (isLoading || !selectedChild) {
+  if (isSwitching) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+
+  if (!selectedChild) {
+    return <NoDeviceConnected />;
   }
   
   const filteredContacts = selectedChild.contacts.filter(contact => 

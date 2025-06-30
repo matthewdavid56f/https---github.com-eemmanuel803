@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Folder as FolderIcon, File as FileIcon, FileImage, FileVideo, FileText, Music, ArrowLeft, RefreshCw, Download, Loader2 } from "lucide-react"
 import type { FileSystemItem } from "@/contexts/child-context"
 import { useChild } from "@/contexts/child-context"
+import { NoDeviceConnected } from "@/components/no-device-connected"
 
 
 const getFileIcon = (item: FileSystemItem) => {
@@ -44,7 +45,7 @@ const getFileIcon = (item: FileSystemItem) => {
 
 export default function FileExplorerPage() {
   const { toast } = useToast()
-  const { selectedChild, isLoading } = useChild()
+  const { selectedChild, isSwitching } = useChild()
   const [currentPath, setCurrentPath] = React.useState('/')
   const [history, setHistory] = React.useState<string[]>(['/'])
   
@@ -54,8 +55,12 @@ export default function FileExplorerPage() {
       setHistory(['/']);
   }, [selectedChild]);
 
-  if (isLoading || !selectedChild) {
+  if (isSwitching) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+
+  if (!selectedChild) {
+    return <NoDeviceConnected />;
   }
 
   const handleItemClick = (item: FileSystemItem) => {

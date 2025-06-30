@@ -11,8 +11,9 @@ export type { App, CallLog, Contact, FileSystem, FileSystemItem, Geofence, Locat
 type ChildContextType = {
   childrenData: ChildSummary[];
   selectedChild: Child | null;
-  setSelectedChildId: (id: string) => void;
-  isLoading: boolean;
+  setSelectedChildId: (id: string | null) => void;
+  isLoading: boolean; // For the very initial load of the child list
+  isSwitching: boolean; // For when switching between children
 };
 
 const ChildContext = React.createContext<ChildContextType | undefined>(undefined);
@@ -22,35 +23,37 @@ export const ChildProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedChildId, setSelectedChildId] = React.useState<string | null>(null);
   const [selectedChild, setSelectedChild] = React.useState<Child | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isSwitching, setIsSwitching] = React.useState(false);
 
   React.useEffect(() => {
     const fetchChildren = async () => {
+      setIsLoading(true);
       const childrenList = await getChildren();
       setChildrenData(childrenList);
-      if (childrenList.length > 0) {
-        setSelectedChildId(childrenList[0].id);
-      } else {
-        setIsLoading(false);
-      }
+      // We no longer auto-select a child. The app starts in a disconnected state.
+      setIsLoading(false);
     };
     fetchChildren();
   }, []);
 
   React.useEffect(() => {
     if (selectedChildId) {
-      setIsLoading(true);
+      setIsSwitching(true);
+      setSelectedChild(null); // Clear previous child data
       const fetchChildData = async () => {
         const childData = await getChildById(selectedChildId);
         setSelectedChild(childData);
-        setIsLoading(false);
+        setIsSwitching(false);
       };
       fetchChildData();
+    } else {
+      setSelectedChild(null);
     }
   }, [selectedChildId]);
   
-  const value = { childrenData, selectedChild, setSelectedChildId: (id: string) => setSelectedChildId(id), isLoading };
+  const value = { childrenData, selectedChild, setSelectedChildId, isLoading, isSwitching };
 
-  if (isLoading && !selectedChild) {
+  if (isLoading) {
      return (
       <div className="w-full h-screen flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

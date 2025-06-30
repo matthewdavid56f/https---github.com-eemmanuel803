@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/avatar"
 import { useChild } from "@/contexts/child-context"
 import { sendDeviceCommand } from "@/ai/flows/device-commands"
+import { NoDeviceConnected } from "@/components/no-device-connected"
 
 const messageSchema = z.object({
   recipient: z.string().min(1, { message: "Recipient phone number is required." }),
@@ -40,7 +41,7 @@ const messageSchema = z.object({
 export default function SmsMessagesPage() {
   const [isRefreshing, setIsRefreshing] = React.useState(false)
   const { toast } = useToast()
-  const { selectedChild, isLoading } = useChild()
+  const { selectedChild, isSwitching } = useChild()
 
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
@@ -58,11 +59,17 @@ export default function SmsMessagesPage() {
   }, [])
 
   React.useEffect(() => {
-    fetchMessages()
-  }, [fetchMessages])
+    if (selectedChild) {
+      fetchMessages()
+    }
+  }, [selectedChild, fetchMessages])
   
-  if (isLoading || !selectedChild) {
+  if (isSwitching) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+
+  if (!selectedChild) {
+    return <NoDeviceConnected />;
   }
 
   async function onSubmit(values: z.infer<typeof messageSchema>) {

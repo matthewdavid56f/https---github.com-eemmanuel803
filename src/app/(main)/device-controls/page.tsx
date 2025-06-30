@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useChild } from "@/contexts/child-context"
 import { ShieldAlert, Globe, Send, Loader2 } from "lucide-react"
 import { sendDeviceCommand, type DeviceCommandInput } from "@/ai/flows/device-commands"
+import { NoDeviceConnected } from "@/components/no-device-connected"
 
 type LoadingStates = {
   lock30?: boolean;
@@ -21,7 +22,7 @@ type LoadingStates = {
 
 export default function DeviceControlsPage() {
   const { toast } = useToast()
-  const { selectedChild, isLoading: isChildLoading } = useChild()
+  const { selectedChild, isSwitching } = useChild()
   const [loading, setLoading] = React.useState<LoadingStates>({})
   const [message, setMessage] = React.useState("")
   const [url, setUrl] = React.useState("https://google.com")
@@ -58,8 +59,12 @@ export default function DeviceControlsPage() {
     }
   }
   
-  if (isChildLoading || !selectedChild) {
+  if (isSwitching) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+
+  if (!selectedChild) {
+    return <NoDeviceConnected />;
   }
 
   return (
