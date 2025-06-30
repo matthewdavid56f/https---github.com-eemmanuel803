@@ -36,8 +36,8 @@ export function DashboardNav() {
     <div className="flex h-full flex-col">
       <SidebarHeader className="h-14">
         <Link href="/" className="flex items-center gap-2">
-          <Logo className="size-8 text-primary" />
-          <span className="text-lg font-semibold text-foreground group-data-[collapsible=icon]:hidden">Synthetic Eyes</span>
+          <Logo className="size-8" />
+          <span className="text-lg font-semibold text-foreground group-data-[collapsible=icon]:hidden">Guad eyes</span>
         </Link>
       </SidebarHeader>
 
