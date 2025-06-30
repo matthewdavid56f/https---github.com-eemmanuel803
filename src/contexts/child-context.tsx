@@ -12,6 +12,7 @@ type ChildContextType = {
   childrenData: ChildSummary[];
   selectedChild: Child | null;
   setSelectedChildId: (id: string | null) => void;
+  addNewChild: (child: Child) => void;
   isLoading: boolean; // For the very initial load of the child list
   isSwitching: boolean; // For when switching between children
 };
@@ -30,7 +31,6 @@ export const ChildProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(true);
       const childrenList = await getChildren();
       setChildrenData(childrenList);
-      // We start with no child selected.
       setSelectedChildId(childrenList.length > 0 ? childrenList[0].id : null);
       setIsLoading(false);
     };
@@ -46,7 +46,6 @@ export const ChildProvider = ({ children }: { children: React.ReactNode }) => {
         setSelectedChild(childData);
         setIsSwitching(false);
       };
-      // Adding a small delay to make the switch feel more deliberate
       const timer = setTimeout(() => fetchChildData(), 150);
       return () => clearTimeout(timer);
     } else {
@@ -55,7 +54,20 @@ export const ChildProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [selectedChildId]);
   
-  const value = { childrenData, selectedChild, setSelectedChildId: setSelectedChildId, isLoading, isSwitching };
+  const addNewChild = (newChild: Child) => {
+    const summary: ChildSummary = {
+      id: newChild.id,
+      name: newChild.name,
+      avatar: newChild.avatar,
+      deviceName: newChild.deviceName,
+      isOnline: newChild.isOnline,
+      batteryLevel: newChild.batteryLevel,
+    };
+    setChildrenData(prevData => [...prevData, summary]);
+    setSelectedChildId(newChild.id);
+  };
+
+  const value = { childrenData, selectedChild, setSelectedChildId, addNewChild, isLoading, isSwitching };
 
   if (isLoading) {
      return (

@@ -1,8 +1,10 @@
 
 "use client"
 
-import { WifiOff } from 'lucide-react';
+import Link from "next/link"
+import { WifiOff, PlusCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export function NoDeviceConnected() {
   return (
@@ -14,13 +16,16 @@ export function NoDeviceConnected() {
           </div>
           <CardTitle className="mt-4">No Device Connected</CardTitle>
           <CardDescription>
-            Please select a child's device from the dropdown menu in the dashboard to view their information.
+            To begin, please pair your first child's device with your account.
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <p className="text-sm text-muted-foreground">
-                In a real application, you would pair a new device from this screen.
-            </p>
+            <Button asChild>
+                <Link href="/pair-device">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Pair New Device
+                </Link>
+            </Button>
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,7 @@
 
 "use client"
 
+import { useRouter } from "next/navigation"
 import {
   Card,
   CardContent,
@@ -13,8 +14,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from "@/components/ui/select"
-import { Smartphone, Loader2 } from "lucide-react"
+import { Smartphone, Loader2, PlusCircle } from "lucide-react"
 import type { ChildSummary, Child } from "@/lib/data"
 
 interface DeviceStatusCardProps {
@@ -24,7 +26,16 @@ interface DeviceStatusCardProps {
 }
 
 export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }: DeviceStatusCardProps) {
+  const router = useRouter();
   
+  const handleValueChange = (id: string) => {
+    if (id === 'add-new-device') {
+      router.push('/pair-device');
+    } else {
+      onChildChange(id);
+    }
+  }
+
   if (!selectedChild && childrenData.length === 0) {
      return (
        <Card>
@@ -44,7 +55,7 @@ export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }:
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <Select value={selectedChild?.id ?? ""} onValueChange={(id) => onChildChange(id)}>
+        <Select value={selectedChild?.id ?? ""} onValueChange={handleValueChange}>
           <SelectTrigger className="w-auto border-0 shadow-none focus:ring-0 text-sm font-medium p-0 h-auto">
             <SelectValue placeholder="Select Device..." />
           </SelectTrigger>
@@ -52,6 +63,13 @@ export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }:
             {childrenData.map(child => (
               <SelectItem key={child.id} value={child.id}>{child.name}</SelectItem>
             ))}
+            <SelectSeparator />
+             <SelectItem value="add-new-device">
+                <div className="flex items-center gap-2 text-primary">
+                    <PlusCircle className="h-4 w-4" />
+                    <span>Pair New Device</span>
+                </div>
+            </SelectItem>
           </SelectContent>
         </Select>
         {selectedChild ? (
