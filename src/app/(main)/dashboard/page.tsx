@@ -21,6 +21,7 @@ export default function DashboardPage() {
     const processActivities = async () => {
       if (!selectedChild) {
         setProcessedActivities([]);
+        setIsAnalyzing(false);
         return;
       };
       
@@ -68,7 +69,7 @@ export default function DashboardPage() {
             selectedChild={selectedChild}
             onChildChange={setSelectedChildId}
           />
-          {selectedChild && (
+          {selectedChild && !isSwitching && (
             <>
                <KeyMetricCard
                   title="Alerts Today"
@@ -91,11 +92,42 @@ export default function DashboardPage() {
                 />
             </>
           )}
+           {isSwitching && Array.from({ length: 3 }).map((_, i) => (
+             <Card key={i}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="h-4 bg-muted rounded w-2/4" />
+                </CardHeader>
+                <CardContent>
+                    <div className="h-7 bg-muted rounded w-1/4 mb-2" />
+                    <div className="h-3 bg-muted rounded w-3/4" />
+                </CardContent>
+            </Card>
+           ))}
+
        </div>
 
        <div className="flex-1">
           {isSwitching ? (
-             <div className="flex-1 flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+             <div className="grid gap-4 lg:grid-cols-2">
+               <Card>
+                  <CardHeader>
+                    <CardTitle>Activity Feed</CardTitle>
+                     <CardDescription>Loading activity...</CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-[400px] flex items-center justify-center">
+                     <Loader2 className="h-8 w-8 animate-spin" />
+                  </CardContent>
+               </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Screen Time by App</CardTitle>
+                    <CardDescription>Loading usage statistics...</CardDescription>
+                  </CardHeader>
+                   <CardContent className="h-[400px] flex items-center justify-center">
+                     <Loader2 className="h-8 w-8 animate-spin" />
+                  </CardContent>
+                </Card>
+             </div>
           ) : !selectedChild ? (
              <NoDeviceConnected />
           ) : (

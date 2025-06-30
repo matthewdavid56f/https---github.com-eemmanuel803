@@ -97,8 +97,8 @@ export type ChildSummary = Pick<Child, 'id' | 'name' | 'avatar' | 'deviceName' |
 // In a real app, this data would live in your Firestore database.
 const childrenData: Child[] = [
     {
-    id: 'alex',
-    name: 'Alex',
+    id: 'child1',
+    name: 'Child 1',
     avatar: 'https://placehold.co/40x40.png',
     deviceName: 'Galaxy S22',
     isOnline: true,
@@ -144,19 +144,19 @@ const childrenData: Child[] = [
       { app: "other", minutes: 20, fill: "var(--color-other)" },
     ],
     contacts: [
-      { name: 'Mom', phone: '555-0101', avatar: 'M', avatarImage: 'https://placehold.co/40x40.png' },
-      { name: 'Dad', phone: '555-0102', avatar: 'D', avatarImage: 'https://placehold.co/40x40.png' },
-      { name: 'Alex Johnson', phone: '555-0103', avatar: 'A', avatarImage: 'https://placehold.co/40x40.png' },
+      { name: 'Parent 1', phone: '555-0101', avatar: 'P1', avatarImage: 'https://placehold.co/40x40.png' },
+      { name: 'Parent 2', phone: '555-0102', avatar: 'P2', avatarImage: 'https://placehold.co/40x40.png' },
+      { name: 'Chris Smith', phone: '555-0103', avatar: 'CS', avatarImage: 'https://placehold.co/40x40.png' },
       { name: 'Emily Carter', phone: '555-0107', avatar: 'EC' },
     ],
     callLogs: [
-      { id: '1', name: 'Alex Johnson', number: '555-0103', type: 'outgoing', duration: '5m 12s', time: '10:45 AM' },
-      { id: '2', name: 'Mom', number: '555-0101', type: 'incoming', duration: '12m 3s', time: '10:30 AM' },
+      { id: '1', name: 'Chris Smith', number: '555-0103', type: 'outgoing', duration: '5m 12s', time: '10:45 AM' },
+      { id: '2', name: 'Parent 1', number: '555-0101', type: 'incoming', duration: '12m 3s', time: '10:30 AM' },
       { id: '3', name: 'Unknown', number: '555-0123', type: 'missed', duration: '0m 0s', time: '9:15 AM' },
     ],
     smsMessages: [
-       { id: '1', sender: 'Alex', content: "Hey, are we still on for the movies tonight?", timestamp: "5min ago", avatar: "A" },
-       { id: '2', sender: 'Mom', content: "Don't forget to take out the trash before you leave!", timestamp: "1hr ago", avatar: "M" },
+       { id: '1', sender: 'Chris Smith', content: "Hey, are we still on for the movies tonight?", timestamp: "5min ago", avatar: "CS" },
+       { id: '2', sender: 'Parent 1', content: "Don't forget to take out the trash before you leave!", timestamp: "1hr ago", avatar: "P1" },
     ],
     installedApps: [
       { name: 'Google Chrome', packageName: 'com.android.chrome', icon: 'Globe', iconClassName: 'text-muted-foreground', version: '125.0.6422.112' },
@@ -167,7 +167,7 @@ const childrenData: Child[] = [
     fileSystem: {
         '/': [ { name: 'DCIM', type: 'folder' }, { name: 'Download', type: 'folder' } ],
         '/DCIM': [ { name: 'Camera', type: 'folder' } ],
-        '/DCIM/Camera': [ { name: 'IMG_Alex_1.jpg', type: 'file', fileType: 'image', size: '4.5 MB', modified: '2024-05-20 10:30', thumbnail: 'https://placehold.co/40x40.png', hint: 'beach sunset' } ],
+        '/DCIM/Camera': [ { name: 'IMG_20240520.jpg', type: 'file', fileType: 'image', size: '4.5 MB', modified: '2024-05-20 10:30', thumbnail: 'https://placehold.co/40x40.png', hint: 'beach sunset' } ],
         '/Download': [ { name: 'project.pdf', type: 'file', fileType: 'document', size: '1.2 MB', modified: '2024-05-15 09:00' } ]
     },
     location: {
@@ -182,8 +182,8 @@ const childrenData: Child[] = [
     ]
   },
   {
-    id: 'ben',
-    name: 'Ben',
+    id: 'child2',
+    name: 'Child 2',
     avatar: 'https://placehold.co/40x40.png',
     deviceName: 'Pixel 6a',
     isOnline: false,
@@ -220,16 +220,16 @@ const childrenData: Child[] = [
       { app: "other", minutes: 10, fill: "var(--color-other)" },
     ],
     contacts: [
-      { name: 'Mom', phone: '555-0101', avatar: 'M' },
-      { name: 'Grandma', phone: '555-0105', avatar: 'G' },
+      { name: 'Parent 1', phone: '555-0101', avatar: 'P1' },
+      { name: 'Grandparent', phone: '555-0105', avatar: 'G' },
       { name: 'David Lee', phone: '555-0108', avatar: 'DL' },
     ],
     callLogs: [
-       { id: '1', name: 'Grandma', number: '555-0105', type: 'incoming', duration: '25m 42s', time: 'Yesterday' },
+       { id: '1', name: 'Grandparent', number: '555-0105', type: 'incoming', duration: '25m 42s', time: 'Yesterday' },
        { id: '2', name: 'David Lee', number: '555-0108', type: 'outgoing', duration: '3m 1s', time: '2 days ago' },
     ],
     smsMessages: [
-       { id: '1', sender: 'David Lee', content: "Yo, you free to play later?", timestamp: "2h ago", avatar: "D" },
+       { id: '1', sender: 'David Lee', content: "Yo, you free to play later?", timestamp: "2h ago", avatar: "DL" },
        { id: '2', sender: 'Unknown', content: "Your pizza is on the way.", timestamp: "3hr ago", avatar: "#" },
     ],
     installedApps: [
@@ -239,7 +239,7 @@ const childrenData: Child[] = [
     fileSystem: {
         '/': [ { name: 'Pictures', type: 'folder' } ],
         '/Pictures': [ { name: 'Screenshots', type: 'folder' } ],
-        '/Pictures/Screenshots': [ { name: 'Screenshot_Ben_1.png', type: 'file', fileType: 'image', size: '1.8 MB', modified: '2024-05-19 12:00', thumbnail: 'https://placehold.co/40x40.png', hint: 'app interface' } ]
+        '/Pictures/Screenshots': [ { name: 'Screenshot_20240519.png', type: 'file', fileType: 'image', size: '1.8 MB', modified: '2024-05-19 12:00', thumbnail: 'https://placehold.co/40x40.png', hint: 'app interface' } ]
     },
     location: {
         address: '456 Oak Avenue, Springfield, USA',
@@ -253,8 +253,8 @@ const childrenData: Child[] = [
     ]
   },
   {
-    id: 'chloe',
-    name: 'Chloe',
+    id: 'child3',
+    name: 'Child 3',
     avatar: 'https://placehold.co/40x40.png',
     deviceName: 'iPhone 13',
     isOnline: true,
@@ -290,13 +290,13 @@ const childrenData: Child[] = [
       { app: "facetime", minutes: 20, fill: "var(--color-facetime)" },
     ],
     contacts: [
-      { name: 'Mom', phone: '555-0101', avatar: 'M' },
-      { name: 'Dad', phone: '555-0102', avatar: 'D' },
+      { name: 'Parent 1', phone: '555-0101', avatar: 'P1' },
+      { name: 'Parent 2', phone: '555-0102', avatar: 'P2' },
       { name: 'Jessica', phone: '555-0110', avatar: 'J' },
     ],
     callLogs: [
         { id: '1', name: 'Jessica', number: '555-0110', type: 'outgoing', duration: '32m 8s', time: '4:30 PM' },
-        { id: '2', name: 'Dad', number: '555-0102', type: 'missed', duration: '0m 0s', time: '1:00 PM' },
+        { id: '2', name: 'Parent 2', number: '555-0102', type: 'missed', duration: '0m 0s', time: '1:00 PM' },
     ],
     smsMessages: [
         { id: '1', sender: 'Jessica', content: "omg did u see that new post?", timestamp: "15min ago", avatar: "J" },
@@ -308,7 +308,7 @@ const childrenData: Child[] = [
     fileSystem: {
         '/': [ { name: 'DCIM', type: 'folder' } ],
         '/DCIM': [ { name: 'iMessage Photos', type: 'folder' } ],
-        '/DCIM/iMessage Photos': [ { name: 'photo_from_jessica.jpg', type: 'file', fileType: 'image', size: '3.1 MB', modified: '2024-05-22 18:00', thumbnail: 'https://placehold.co/40x40.png', hint: 'friends selfie' } ],
+        '/DCIM/iMessage Photos': [ { name: 'IMG_0522.jpg', type: 'file', fileType: 'image', size: '3.1 MB', modified: '2024-05-22 18:00', thumbnail: 'https://placehold.co/40x40.png', hint: 'friends selfie' } ],
     },
     location: {
         address: '789 Pine Lane, Springfield, USA',

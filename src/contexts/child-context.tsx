@@ -30,7 +30,8 @@ export const ChildProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(true);
       const childrenList = await getChildren();
       setChildrenData(childrenList);
-      // We no longer auto-select a child. The app starts in a disconnected state.
+      // We start with no child selected.
+      setSelectedChildId(childrenList.length > 0 ? childrenList[0].id : null);
       setIsLoading(false);
     };
     fetchChildren();
@@ -45,13 +46,16 @@ export const ChildProvider = ({ children }: { children: React.ReactNode }) => {
         setSelectedChild(childData);
         setIsSwitching(false);
       };
-      fetchChildData();
+      // Adding a small delay to make the switch feel more deliberate
+      const timer = setTimeout(() => fetchChildData(), 150);
+      return () => clearTimeout(timer);
     } else {
       setSelectedChild(null);
+      setIsSwitching(false);
     }
   }, [selectedChildId]);
   
-  const value = { childrenData, selectedChild, setSelectedChildId, isLoading, isSwitching };
+  const value = { childrenData, selectedChild, setSelectedChildId: setSelectedChildId, isLoading, isSwitching };
 
   if (isLoading) {
      return (
