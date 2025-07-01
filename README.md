@@ -38,3 +38,61 @@ Now, in that new terminal window, type the following two commands, pressing Ente
     ```
 
 After the last command, the terminal will give you a link like **http://localhost:9002**. Click on it or copy it into your browser to see your app running live!
+
+---
+
+## How to Run on Android (Termux - Advanced)
+
+Running a full web development environment on a phone is complex and may not work on all devices. These are advanced instructions.
+
+### Step 1: Prepare Termux
+
+Open Termux and run these commands to install the tools you need. Press Enter after each one.
+
+1.  Update Termux's packages:
+    ```bash
+    pkg update && pkg upgrade
+    ```
+2.  Install Node.js (the JavaScript environment):
+    ```bash
+    pkg install nodejs
+    ```
+3.  Install the `unzip` tool:
+    ```bash
+    pkg install unzip
+    ```
+4.  Allow Termux to access your phone's storage:
+    ```bash
+    termux-setup-storage
+    ```
+    (A popup will ask for permission on your phone. You must allow it.)
+
+### Step 2: Find and Unzip the Project
+
+1.  Go to your Downloads directory:
+    ```bash
+    cd ~/storage/downloads
+    ```
+2.  Find the downloaded file. It's probably named `studio-master.zip` or something similar. Unzip it:
+    ```bash
+    unzip "studio-master.zip"
+    ```
+    (You might need to change the filename to match what you downloaded).
+
+3.  This will create a `studio-master` folder. Just like on the computer, you need to go inside it twice:
+    ```bash
+    cd studio-master/studio-master
+    ```
+
+### Step 3: Run the App
+
+1.  Now, install all the code libraries. This might take a long time on a phone.
+    ```bash
+    npm install
+    ```
+2.  Finally, start the application:
+    ```bash
+    npm run dev
+    ```
+
+If everything works, Termux will show a link like **http://localhost:9002**. You can open this in the web browser on your phone to see the app.
