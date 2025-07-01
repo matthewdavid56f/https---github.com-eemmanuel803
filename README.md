@@ -26,9 +26,9 @@ You are in the correct place if you now see a list of files and folders, includi
 
 Now, in that new terminal window, type the following two commands, pressing Enter after each one.
 
-1.  First, install all the necessary code libraries:
+1.  First, install all the necessary code libraries. This command fixes potential version conflicts.
     ```bash
-    npm install
+    npm install --legacy-peer-deps
     ```
     (This might take a minute or two to finish.)
 
@@ -49,19 +49,11 @@ Running a full web development environment on a phone is complex and may not wor
 
 Open Termux and run these commands to install the tools you need. Press Enter after each one.
 
-1.  Update Termux's packages:
+1.  Update Termux's packages and install tools:
     ```bash
-    pkg update && pkg upgrade
+    pkg update && pkg upgrade -y && pkg install nodejs unzip -y
     ```
-2.  Install Node.js (the JavaScript environment):
-    ```bash
-    pkg install nodejs
-    ```
-3.  Install the `unzip` tool:
-    ```bash
-    pkg install unzip
-    ```
-4.  Allow Termux to access your phone's storage:
+2.  Allow Termux to access your phone's storage:
     ```bash
     termux-setup-storage
     ```
@@ -86,9 +78,9 @@ Open Termux and run these commands to install the tools you need. Press Enter af
 
 ### Step 3: Run the App
 
-1.  Now, install all the code libraries. This might take a long time on a phone.
+1.  Now, install all the code libraries. This command fixes the error you saw before. This might take a long time on a phone.
     ```bash
-    npm install
+    npm install --legacy-peer-deps
     ```
 2.  Finally, start the application:
     ```bash
