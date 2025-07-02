@@ -1,13 +1,13 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 
-// Your web app's Firebase configuration, loaded from environment variables
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCnJo7RLOf_Ctl05Yaxy4hAOhaabzKcy54",
+  authDomain: "guad-eyes.firebaseapp.com",
+  projectId: "guad-eyes",
+  storageBucket: "guad-eyes.appspot.com",
+  messagingSenderId: "402502331730",
+  appId: "1:402502331730:web:8f08df58cd9e01a0e69e8b"
 };
 
 // Initialize Firebase, preventing re-initialization in a Next.js dev environment
