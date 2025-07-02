@@ -26,32 +26,45 @@ export const ChildProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSwitching, setIsSwitching] = React.useState(false);
 
+  // This effect runs once to get the list of children and set the first one.
   React.useEffect(() => {
     const fetchChildren = async () => {
-      setIsLoading(true);
       const childrenList = await getChildren();
       setChildrenData(childrenList);
+      // Set the first child as selected. The next effect will load it.
+      // If there are no children, selectedChildId will be null, and the next effect will handle it.
       setSelectedChildId(childrenList.length > 0 ? childrenList[0].id : null);
-      setIsLoading(false);
     };
     fetchChildren();
   }, []);
 
+  // This effect runs whenever the selected child ID changes.
   React.useEffect(() => {
-    if (selectedChildId) {
-      setIsSwitching(true);
-      setSelectedChild(null); // Clear previous child data
-      const fetchChildData = async () => {
-        const childData = await getChildById(selectedChildId);
-        setSelectedChild(childData);
+    const fetchChildData = async () => {
+      // If there's no ID, it means there are no children. Stop all loading.
+      if (!selectedChildId) {
+        setSelectedChild(null);
+        setIsLoading(false);
         setIsSwitching(false);
-      };
-      const timer = setTimeout(() => fetchChildData(), 150);
-      return () => clearTimeout(timer);
-    } else {
-      setSelectedChild(null);
+        return;
+      }
+
+      // If we are here, we have an ID to load.
+      // If `isLoading` is true, it's the initial load. Otherwise, it's a switch.
+      if (!isLoading) {
+        setIsSwitching(true);
+      }
+      setSelectedChild(null); // Clear old data to trigger loading states in components
+
+      const childData = await getChildById(selectedChildId);
+      setSelectedChild(childData);
+      
+      // We are finished loading, whether initial or a switch.
+      setIsLoading(false);
       setIsSwitching(false);
-    }
+    };
+
+    fetchChildData();
   }, [selectedChildId]);
   
   const addNewChild = (newChild: Child) => {
