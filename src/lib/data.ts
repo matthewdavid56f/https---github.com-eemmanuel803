@@ -104,6 +104,36 @@ export type DiscoveredDevice = {
 // Initialize Firestore
 const db = getFirestore(app);
 
+// A default structure for a Child object to prevent crashes on incomplete data
+const defaultChildData: Omit<Child, 'id' | 'name' | 'avatar'> = {
+  deviceName: 'Device',
+  isOnline: false,
+  batteryLevel: 0,
+  metrics: {
+    alerts: '0',
+    alertsDescription: 'No alerts recorded',
+    screenTime: '0h 0m',
+    screenTimeDescription: 'No usage recorded',
+    appsChecked: '0',
+    appsCheckedDescription: 'No apps checked',
+  },
+  activities: [],
+  screenTimeData: [],
+  contacts: [],
+  callLogs: [],
+  smsMessages: [],
+  installedApps: [],
+  fileSystem: { '/': [] },
+  location: {
+    address: 'Not available',
+    coordinates: '0.0, 0.0',
+    lastUpdated: 'Never',
+    mapImage: 'https://placehold.co/800x600.png',
+  },
+  geofences: [],
+};
+
+
 const handleFirestoreError = (error: any, context: string) => {
     if (error.code === 'permission-denied') {
       console.warn(
@@ -137,13 +167,14 @@ export async function getChildren(): Promise<ChildSummary[]> {
     const childrenSnapshot = await getDocs(childrenCol);
     const childrenList = childrenSnapshot.docs.map(doc => {
       const data = doc.data();
+      const name = data.name || 'Unnamed Device';
       return { 
         id: doc.id, 
-        name: data.name,
-        avatar: data.avatar,
-        deviceName: data.deviceName,
-        isOnline: data.isOnline,
-        batteryLevel: data.batteryLevel,
+        name: name,
+        avatar: data.avatar || name.charAt(0).toUpperCase(),
+        deviceName: data.deviceName || 'Device',
+        isOnline: data.isOnline ?? false,
+        batteryLevel: data.batteryLevel ?? 0,
       } as ChildSummary
     });
     return childrenList;
@@ -158,7 +189,27 @@ export async function getChildById(id: string): Promise<Child | null> {
     const childDocRef = doc(db, 'children', id);
     const childDocSnap = await getDoc(childDocRef);
     if (childDocSnap.exists()) {
-      return { id: childDocSnap.id, ...childDocSnap.data() } as Child;
+      const data = childDocSnap.data();
+      const name = data.name || 'Unnamed Device';
+
+      // Deep merge the fetched data with defaults to prevent errors
+      const fullChildData: Child = {
+        ...defaultChildData,
+        ...data,
+        id: childDocSnap.id,
+        name: name,
+        avatar: data.avatar || name.charAt(0).toUpperCase(),
+        metrics: {
+            ...defaultChildData.metrics,
+            ...(data.metrics || {}),
+        },
+        location: {
+            ...defaultChildData.location,
+            ...(data.location || {}),
+        }
+      };
+      
+      return fullChildData;
     } else {
       return null;
     }
@@ -221,7 +272,9 @@ export async function pairNewDevice(childName: string, device: DiscoveredDevice)
     await deleteDoc(deviceToDeleteRef);
     
     // When live, we get the real object back with its ID from firestore
-    return { id: docRef.id, ...newChildData };
+    const newChild = await getChildById(docRef.id);
+    return newChild;
+
   } catch (error) {
     handleFirestoreError(error, "pairNewDevice");
     return null;
