@@ -25,12 +25,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { useChild } from "@/contexts/child-context"
-import { pairNewDevice } from "@/lib/data"
-
-type DiscoveredDevice = {
-  id: string
-  name: string
-}
+import { pairNewDevice, getDiscoveredDevices, type DiscoveredDevice } from "@/lib/data"
 
 export default function PairDevicePage() {
   const router = useRouter()
@@ -46,13 +41,20 @@ export default function PairDevicePage() {
     if (isRefreshing) return;
     setIsRefreshing(true);
     
-    // In a real application, this would be an API call to find unpaired devices.
-    // For this shell, we simulate a delay and always return an empty list.
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setDiscoveredDevices([]);
+    try {
+      const devices = await getDiscoveredDevices();
+      setDiscoveredDevices(devices);
+    } catch (error) {
+       toast({
+        title: "Error",
+        description: "Could not fetch discovered devices from the database.",
+        variant: "destructive",
+      });
+      setDiscoveredDevices([]); // Clear on error
+    }
     
     setIsRefreshing(false);
-  }, [isRefreshing]);
+  }, [isRefreshing, toast]);
 
   React.useEffect(() => {
     searchForDevices(); // Initial search on load
@@ -82,7 +84,7 @@ export default function PairDevicePage() {
 
     setIsPairing(true)
     try {
-      const newChild = await pairNewDevice(childName.trim(), pairingDevice.name)
+      const newChild = await pairNewDevice(childName.trim(), pairingDevice)
       if (newChild) {
         addNewChild(newChild)
         toast({

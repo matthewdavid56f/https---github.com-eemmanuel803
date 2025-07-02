@@ -1,5 +1,5 @@
 
-import { getFirestore, collection, getDocs, doc, getDoc, addDoc, serverTimestamp, type Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, getDoc, addDoc, serverTimestamp, type Timestamp, deleteDoc } from 'firebase/firestore';
 import { app } from './firebase';
 
 import type { Activity } from "@/components/activity-feed";
@@ -95,10 +95,30 @@ export type Child = {
 
 export type ChildSummary = Pick<Child, 'id' | 'name' | 'avatar' | 'deviceName' | 'isOnline' | 'batteryLevel'>;
 
+export type DiscoveredDevice = {
+  id: string;
+  name: string;
+};
+
 
 // Initialize Firestore
 const db = getFirestore(app);
 
+
+export async function getDiscoveredDevices(): Promise<DiscoveredDevice[]> {
+  try {
+    const devicesCol = collection(db, 'discovered_devices');
+    const devicesSnapshot = await getDocs(devicesCol);
+    const devicesList = devicesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as DiscoveredDevice));
+    return devicesList;
+  } catch (error) {
+    console.error("Error fetching discovered devices from Firestore:", error);
+    return [];
+  }
+}
 
 export async function getChildren(): Promise<ChildSummary[]> {
   try {
@@ -137,14 +157,14 @@ export async function getChildById(id: string): Promise<Child | null> {
   }
 }
 
-export async function pairNewDevice(childName: string, deviceName: string): Promise<Child | null> {
+export async function pairNewDevice(childName: string, device: DiscoveredDevice): Promise<Child | null> {
   const name = childName.trim();
   const avatar = name.charAt(0).toUpperCase() || 'D';
 
   const newChildData: Omit<Child, 'id' | 'createdAt'> = {
     name,
     avatar,
-    deviceName,
+    deviceName: device.name,
     isOnline: true,
     batteryLevel: Math.floor(Math.random() * 40) + 60,
     metrics: {
@@ -184,6 +204,11 @@ export async function pairNewDevice(childName: string, deviceName: string): Prom
   try {
     const docDataWithTimestamp = { ...newChildData, createdAt: serverTimestamp() };
     const docRef = await addDoc(collection(db, "children"), docDataWithTimestamp);
+    
+    // After pairing, remove the device from the discovered list
+    const deviceToDeleteRef = doc(db, 'discovered_devices', device.id);
+    await deleteDoc(deviceToDeleteRef);
+    
     // When live, we get the real object back with its ID from firestore
     return { id: docRef.id, ...newChildData };
   } catch (error) {
