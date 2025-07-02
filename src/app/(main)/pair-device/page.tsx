@@ -2,8 +2,9 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { PlusCircle, Loader2, Copy } from "lucide-react"
+import { PlusCircle, Loader2, QrCode } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -23,24 +24,8 @@ export default function PairDevicePage() {
   const router = useRouter()
   const { toast } = useToast()
   const { addNewChild } = useChild()
-  const [pairingKey, setPairingKey] = React.useState<string | null>(null)
   const [childName, setChildName] = React.useState("")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
-
-  React.useEffect(() => {
-    // Generate a 6-digit key on mount, only on the client
-    setPairingKey(Math.floor(100000 + Math.random() * 900000).toString())
-  }, [])
-
-  const handleCopyKey = () => {
-    if (pairingKey) {
-      navigator.clipboard.writeText(pairingKey)
-      toast({
-        title: "Copied!",
-        description: "Pairing key copied to clipboard.",
-      })
-    }
-  }
 
   async function handlePairDevice() {
     if (!childName) {
@@ -54,14 +39,14 @@ export default function PairDevicePage() {
 
     setIsSubmitting(true)
     try {
-      // In a real app, the backend would confirm the key was used.
+      // In a real app, the backend would confirm the QR code was scanned and link the devices.
       // Here, we simulate this and proceed to create the child profile.
       const newChild = await pairNewDevice(childName)
       if (newChild) {
         addNewChild(newChild)
         toast({
           title: "Device Paired Successfully",
-          description: `${childName}'s device is now being monitored.`,
+          description: `${newChild.name}'s device is now being monitored.`,
         })
         router.push("/dashboard")
       } else {
@@ -87,37 +72,32 @@ export default function PairDevicePage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Pair a New Device</h1>
-            <p className="text-muted-foreground">Generate a key to link your child's device.</p>
+            <p className="text-muted-foreground">Scan the QR code to link your child's device.</p>
           </div>
         </div>
       </header>
       <main className="flex-1 flex items-center justify-center">
         <Card className="w-full max-w-lg">
           <CardHeader>
-            <CardTitle>Your Pairing Key</CardTitle>
+            <CardTitle>Scan to Pair</CardTitle>
             <CardDescription>
-              On your child's device, install and open the Guad Eyes companion app. When prompted, enter the key below to link the devices.
+              On your child's device, install and open the Guad Eyes companion app. When prompted, use it to scan the QR code below.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-8">
-            <div className="flex items-center justify-center space-x-2 rounded-lg border-2 border-dashed bg-muted/50 p-8">
-                {pairingKey ? (
-                    <>
-                        <p className="text-4xl font-bold tracking-widest font-mono text-center text-primary">
-                            {pairingKey}
-                        </p>
-                        <Button variant="ghost" size="icon" onClick={handleCopyKey} aria-label="Copy pairing key">
-                            <Copy className="h-6 w-6" />
-                        </Button>
-                    </>
-                ) : (
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                )}
+            <div className="flex items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8">
+                <Image
+                    src="https://placehold.co/200x200.png"
+                    width={200}
+                    height={200}
+                    alt="Pairing QR Code"
+                    data-ai-hint="qr code"
+                />
             </div>
             
             <div className="space-y-4">
                 <p className="text-sm text-center text-muted-foreground">
-                    Once the key is entered on the child's device, enter their name below to finish.
+                    After scanning the code on the child's device, enter their name below and click Complete Pairing.
                 </p>
                 <div className="space-y-2">
                     <Label htmlFor="childName">Child's Name</Label>
