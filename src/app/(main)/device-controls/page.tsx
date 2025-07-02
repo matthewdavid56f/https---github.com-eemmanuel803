@@ -34,7 +34,7 @@ export default function DeviceControlsPage() {
 
     try {
       const input: DeviceCommandInput = {
-        childName: selectedChild.name,
+        childId: selectedChild.id,
         command,
         payload,
       }

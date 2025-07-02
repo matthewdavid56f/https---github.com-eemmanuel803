@@ -77,7 +77,7 @@ export default function SmsMessagesPage() {
 
     try {
       const result = await sendDeviceCommand({
-        childName: selectedChild.name,
+        childId: selectedChild.id,
         command: 'sendSms',
         payload: {
           recipient: values.recipient,

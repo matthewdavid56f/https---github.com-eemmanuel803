@@ -78,7 +78,7 @@ export default function AppSettingsPage() {
 
     try {
         const input: DeviceCommandInput = {
-            childName: selectedChild.name,
+            childId: selectedChild.id,
             command,
             payload: { ...payload, appName: app.name, packageName: app.packageName },
         };

@@ -1,6 +1,3 @@
-
-"use client"
-
 import { initializeApp, getApp, getApps } from "firebase/app";
 
 // Your web app's Firebase configuration, loaded from environment variables

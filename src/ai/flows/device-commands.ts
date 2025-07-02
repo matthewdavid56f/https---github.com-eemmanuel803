@@ -1,17 +1,21 @@
 'use server';
 /**
- * @fileOverview A flow for sending remote commands to a device.
+ * @fileOverview A flow for sending remote commands to a device via Firestore.
  *
- * - sendDeviceCommand - A function that handles sending various commands.
+ * - sendDeviceCommand - A function that writes a command to the Firestore 'commands' collection.
  * - DeviceCommandInput - The input type for the sendDeviceCommand function.
  * - DeviceCommandOutput - The return type for the sendDeviceCommand function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { app } from '@/lib/firebase';
+
+const db = getFirestore(app);
 
 const DeviceCommandInputSchema = z.object({
-  childName: z.string().describe("The name of the child whose device will receive the command."),
+  childId: z.string().describe("The unique ID of the child's device."),
   command: z.enum(['lock', 'unlock', 'sendMessage', 'openWebsite', 'openApp', 'pinApp', 'sendSms', 'hideApp', 'unhideApp']).describe('The type of command to send.'),
   payload: z.object({
     duration: z.string().optional().describe('The duration for the lock or pin command (e.g., "30 minutes").'),
@@ -41,50 +45,65 @@ const deviceCommandFlow = ai.defineFlow(
     outputSchema: DeviceCommandOutputSchema,
   },
   async (input) => {
-    // In a real application, this is where you would interact
-    // with a service like Firebase Cloud Messaging to send the
-    // command to the actual device.
-    // For this prototype, we will just simulate a successful command.
+    try {
+      // This flow now writes a command document to the 'commands' collection in Firestore.
+      // The child's device would be listening for new documents in this collection
+      // for its specific childId.
+      await addDoc(collection(db, 'commands'), {
+        childId: input.childId,
+        command: input.command,
+        payload: input.payload,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      });
     
-    let message = `Unknown command sent to ${input.childName}'s device.`;
+      let message = `Unknown command sent.`;
 
-    switch (input.command) {
-        case 'lock':
-            message = `Device lock command for ${input.payload.duration} sent to ${input.childName}'s device.`;
-            break;
-        case 'unlock':
-            message = `Device unlock command sent to ${input.childName}'s device.`;
-            break;
-        case 'sendMessage':
-            message = `Popup message sent to ${input.childName}'s device.`;
-            break;
-        case 'openWebsite':
-            message = `Force open website command sent to ${input.childName}'s device.`;
-            break;
-        case 'openApp':
-            message = `Command to open ${input.payload.appName || 'app'} sent to ${input.childName}'s device.`;
-            break;
-        case 'pinApp':
-            if (input.payload.duration) {
-                message = `Command to pin ${input.payload.appName || 'app'} for ${input.payload.duration} sent to ${input.childName}'s device.`;
-            } else {
-                message = `Command to pin ${input.payload.appName || 'app'} indefinitely sent to ${input.childName}'s device.`;
-            }
-            break;
-        case 'sendSms':
-            message = `SMS to ${input.payload.recipient} queued for sending from ${input.childName}'s device.`;
-            break;
-        case 'hideApp':
-            message = `Command to hide ${input.payload.appName || 'app'} sent to ${input.childName}'s device.`;
-            break;
-        case 'unhideApp':
-            message = `Command to unhide ${input.payload.appName || 'app'} sent to ${input.childName}'s device.`;
-            break;
+      switch (input.command) {
+          case 'lock':
+              message = `Device lock command for ${input.payload.duration} has been sent.`;
+              break;
+          case 'unlock':
+              message = `Device unlock command has been sent.`;
+              break;
+          case 'sendMessage':
+              message = `Popup message has been sent.`;
+              break;
+          case 'openWebsite':
+              message = `Command to open website has been sent.`;
+              break;
+          case 'openApp':
+              message = `Command to open ${input.payload.appName || 'app'} has been sent.`;
+              break;
+          case 'pinApp':
+              if (input.payload.duration) {
+                  message = `Command to pin ${input.payload.appName || 'app'} for ${input.payload.duration} has been sent.`;
+              } else {
+                  message = `Command to pin ${input.payload.appName || 'app'} indefinitely has been sent.`;
+              }
+              break;
+          case 'sendSms':
+              message = `SMS to ${input.payload.recipient} has been queued for sending.`;
+              break;
+          case 'hideApp':
+              message = `Command to hide ${input.payload.appName || 'app'} has been sent.`;
+              break;
+          case 'unhideApp':
+              message = `Command to unhide ${input.payload.appName || 'app'} has been sent.`;
+              break;
+      }
+
+      return {
+        success: true,
+        message,
+      };
+
+    } catch (error) {
+      console.error("Error writing command to Firestore:", error);
+      return {
+        success: false,
+        message: "Failed to write command to the database."
+      }
     }
-
-    return {
-      success: true,
-      message,
-    };
   }
 );
