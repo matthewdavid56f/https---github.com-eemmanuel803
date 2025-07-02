@@ -96,17 +96,11 @@ export type Child = {
 export type ChildSummary = Pick<Child, 'id' | 'name' | 'avatar' | 'deviceName' | 'isOnline' | 'batteryLevel'>;
 
 
-// Initialize Firestore and handle environment limitations
-let db;
-try {
-  db = getFirestore(app);
-} catch (e) {
-  console.error("Firebase could not be initialized. This is expected in the Studio environment. The app will use temporary in-memory data for UI interactions, but data will not be persisted.");
-}
+// Initialize Firestore
+const db = getFirestore(app);
+
 
 export async function getChildren(): Promise<ChildSummary[]> {
-  if (!db) return [];
-
   try {
     const childrenCol = collection(db, 'children');
     const childrenSnapshot = await getDocs(childrenCol);
@@ -129,11 +123,6 @@ export async function getChildren(): Promise<ChildSummary[]> {
 }
 
 export async function getChildById(id: string): Promise<Child | null> {
-  if (!db) return null;
-  
-  // Prevent trying to fetch temporary local-only data from Firestore
-  if (id.startsWith('temp_')) return null;
-
   try {
     const childDocRef = doc(db, 'children', id);
     const childDocSnap = await getDoc(childDocRef);
@@ -192,22 +181,13 @@ export async function pairNewDevice(childName: string, deviceName: string): Prom
     geofences: [],
   };
 
-  if (db) {
-    try {
-      const docDataWithTimestamp = { ...newChildData, createdAt: serverTimestamp() };
-      const docRef = await addDoc(collection(db, "children"), docDataWithTimestamp);
-      // When live, we get the real object back with its ID from firestore
-      return { id: docRef.id, ...newChildData };
-    } catch (error) {
-      console.error("Error adding document to Firestore: ", error);
-      // Fall through to return a temporary object if the save fails
-    }
+  try {
+    const docDataWithTimestamp = { ...newChildData, createdAt: serverTimestamp() };
+    const docRef = await addDoc(collection(db, "children"), docDataWithTimestamp);
+    // When live, we get the real object back with its ID from firestore
+    return { id: docRef.id, ...newChildData };
+  } catch (error) {
+    console.error("Error adding document to Firestore: ", error);
+    return null;
   }
-
-  // If DB isn't available (like in Studio) or the save fails, 
-  // we return a temporary object so the UI can still update.
-  // This data will not be persisted.
-  console.warn("Returning temporary object for pairNewDevice. This will not be saved.");
-  const tempId = `temp_${Date.now()}`;
-  return { id: tempId, ...newChildData };
 }
