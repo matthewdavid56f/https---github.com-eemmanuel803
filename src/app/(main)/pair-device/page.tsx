@@ -59,7 +59,7 @@ export default function PairDevicePage() {
     
     const intervalId = setInterval(() => {
       searchForDevices();
-    }, 5000); // Automatically refresh every 5 seconds
+    }, 15000); // Automatically refresh every 15 seconds
 
     return () => clearInterval(intervalId); // Cleanup on unmount
   }, [searchForDevices]);
