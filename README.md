@@ -105,3 +105,39 @@ npm run reinstall
 ```
 
 This will automatically clean up the broken files and try the installation again. After it finishes, you can start the app with `npm run dev`.
+
+---
+## Creating the Companion Mobile App (Conceptual Guide)
+
+This web dashboard is one half of a two-part system. The other half is the **companion app** that must be installed on the child's device. Creating this app is a separate, complex software development project. This guide provides a conceptual overview for a developer.
+
+**Platform Recommendation: Android**
+
+For the level of control this dashboard offers (locking the device, hiding apps, etc.), an **Android app** is the most feasible option. iOS is highly restrictive and does not typically allow one app to control another or the device in this manner.
+
+### Key Responsibilities of the Companion App
+
+The companion app would be responsible for:
+
+1.  **Pairing:** Making itself discoverable on the local network so this web dashboard can find it. On pairing, it should write its details (e.g., device name) to the `discovered_devices` collection in Firestore.
+2.  **Listening for Commands:** It must run a background service that listens in real-time to the `commands` collection in Firestore. When a new document appears with its `childId`, it must execute the command.
+3.  **Executing Commands:** This is the most complex part and requires special Android permissions.
+    *   **Device Administrator API:** To enforce policies like locking the screen. The user must manually grant this permission.
+    *   **Accessibility Service API:** To perform actions on behalf of the user, such as opening an app, pinning an app, or interacting with the UI to hide an app. This is a very powerful permission that also requires explicit user consent.
+    *   **Standard Permissions:** To send an SMS, open a website, etc.
+4.  **Reporting Data:** The app must collect data from the device and write it back to the corresponding child's document in the `children` collection in Firestore. This includes:
+    *   Location data (requires location permissions).
+    *   Call logs (requires call log permissions).
+    *   SMS messages (requires SMS permissions).
+    *   List of installed applications.
+    *   Device status (battery level, online status).
+5.  **Running in the Background:** The app needs to be built as a persistent background service to ensure it can always listen for commands and report data, even when the app isn't open on the screen. This involves handling Android's battery optimization features.
+
+### Development Workflow
+
+1.  **Setup Android Studio:** Use Kotlin (the modern standard) for development.
+2.  **Integrate Firebase:** Add the Firebase SDK for Android to the project, connecting it to the *same* Firebase project this web dashboard uses.
+3.  **Implement Pairing:** Use a network discovery protocol (like mDNS/NSD) to broadcast the device's presence.
+4.  **Build the Background Service:** Create a long-running service that establishes a real-time listener on the `commands` Firestore collection.
+5.  **Implement APIs and Permissions:** Request and handle the Device Administrator and Accessibility Service permissions. This is a delicate process and requires clear explanation to the user.
+6.  **Implement Data Collection:** Use Android's `ContentResolver` and other APIs to query call logs, contacts, SMS, etc., and structure the data to match the `Child` model in this project's `src/lib/data.ts` file.
