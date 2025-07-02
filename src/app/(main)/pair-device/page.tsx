@@ -3,10 +3,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { PlusCircle, Loader2 } from "lucide-react"
+import { PlusCircle, Loader2, Copy } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,42 +14,54 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
 import { useChild } from "@/contexts/child-context"
 import { pairNewDevice } from "@/lib/data"
-
-const pairDeviceSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }).max(50, { message: "Name cannot be longer than 50 characters."}),
-})
 
 export default function PairDevicePage() {
   const router = useRouter()
   const { toast } = useToast()
   const { addNewChild } = useChild()
+  const [pairingKey, setPairingKey] = React.useState<string | null>(null)
+  const [childName, setChildName] = React.useState("")
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
 
-  const form = useForm<z.infer<typeof pairDeviceSchema>>({
-    resolver: zodResolver(pairDeviceSchema),
-    defaultValues: {
-      name: "",
-    },
-  })
+  React.useEffect(() => {
+    // Generate a 6-digit key on mount, only on the client
+    setPairingKey(Math.floor(100000 + Math.random() * 900000).toString())
+  }, [])
 
-  async function onSubmit(values: z.infer<typeof pairDeviceSchema>) {
+  const handleCopyKey = () => {
+    if (pairingKey) {
+      navigator.clipboard.writeText(pairingKey)
+      toast({
+        title: "Copied!",
+        description: "Pairing key copied to clipboard.",
+      })
+    }
+  }
+
+  async function handlePairDevice() {
+    if (!childName) {
+        toast({
+            title: "Name is required",
+            description: "Please enter a name for your child to complete the pairing.",
+            variant: "destructive"
+        })
+        return;
+    }
+
+    setIsSubmitting(true)
     try {
-      const newChild = await pairNewDevice(values.name)
+      // In a real app, the backend would confirm the key was used.
+      // Here, we simulate this and proceed to create the child profile.
+      const newChild = await pairNewDevice(childName)
       if (newChild) {
         addNewChild(newChild)
         toast({
           title: "Device Paired Successfully",
-          description: `${values.name}'s device is now being monitored.`,
+          description: `${childName}'s device is now being monitored.`,
         })
         router.push("/dashboard")
       } else {
@@ -64,6 +73,8 @@ export default function PairDevicePage() {
         description: `Could not pair device: ${error instanceof Error ? error.message : "Please try again."}`,
         variant: "destructive",
       })
+    } finally {
+        setIsSubmitting(false)
     }
   }
 
@@ -76,40 +87,53 @@ export default function PairDevicePage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Pair a New Device</h1>
-            <p className="text-muted-foreground">Follow the steps to connect a new child device to your account.</p>
+            <p className="text-muted-foreground">Generate a key to link your child's device.</p>
           </div>
         </div>
       </header>
       <main className="flex-1 flex items-center justify-center">
         <Card className="w-full max-w-lg">
           <CardHeader>
-            <CardTitle>Enter Device Details</CardTitle>
+            <CardTitle>Your Pairing Key</CardTitle>
             <CardDescription>
-              In a real application, you would scan a QR code from the child's app. For now, just provide a name for the child.
+              On your child's device, install and open the Guad Eyes companion app. When prompted, enter the key below to link the devices.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Child's Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Alex, Chloe..." {...field} disabled={form.formState.isSubmitting} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
-                  Pair Device
+          <CardContent className="space-y-8">
+            <div className="flex items-center justify-center space-x-2 rounded-lg border-2 border-dashed bg-muted/50 p-8">
+                {pairingKey ? (
+                    <>
+                        <p className="text-4xl font-bold tracking-widest font-mono text-center text-primary">
+                            {pairingKey}
+                        </p>
+                        <Button variant="ghost" size="icon" onClick={handleCopyKey} aria-label="Copy pairing key">
+                            <Copy className="h-6 w-6" />
+                        </Button>
+                    </>
+                ) : (
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                )}
+            </div>
+            
+            <div className="space-y-4">
+                <p className="text-sm text-center text-muted-foreground">
+                    Once the key is entered on the child's device, enter their name below to finish.
+                </p>
+                <div className="space-y-2">
+                    <Label htmlFor="childName">Child's Name</Label>
+                    <Input 
+                        id="childName"
+                        placeholder="e.g., Alex, Chloe..."
+                        value={childName}
+                        onChange={(e) => setChildName(e.target.value)}
+                        disabled={isSubmitting}
+                    />
+                </div>
+                 <Button onClick={handlePairDevice} className="w-full" disabled={isSubmitting || !childName}>
+                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                  Complete Pairing
                 </Button>
-              </form>
-            </Form>
+            </div>
           </CardContent>
         </Card>
       </main>
