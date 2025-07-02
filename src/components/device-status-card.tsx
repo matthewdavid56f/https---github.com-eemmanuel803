@@ -15,11 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { Smartphone, Loader2, PlusCircle } from "lucide-react"
+import { Smartphone, Loader2 } from "lucide-react"
 import type { ChildSummary, Child } from "@/lib/data"
-import { pairNewDevice } from "@/lib/data"
 import { useChild } from "@/contexts/child-context"
 
 interface DeviceStatusCardProps {
@@ -29,34 +26,7 @@ interface DeviceStatusCardProps {
 }
 
 export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }: DeviceStatusCardProps) {
-  const { addNewChild } = useChild();
-  const { toast } = useToast();
-  const [isPairing, setIsPairing] = React.useState(false);
-
-  const handlePairNewDevice = async () => {
-    setIsPairing(true);
-    try {
-      const newChild = await pairNewDevice();
-      if (newChild) {
-        addNewChild(newChild);
-        toast({
-          title: "New Device Connected",
-          description: `${newChild.name} (${newChild.deviceName}) is now being monitored.`,
-        });
-      } else {
-        throw new Error("Failed to get new child data back from the service.");
-      }
-    } catch (error) {
-       toast({
-        title: "Pairing Failed",
-        description: `Could not pair a new device. Please try again.`,
-        variant: "destructive",
-      });
-    } finally {
-      setIsPairing(false);
-    }
-  }
-
+  
   if (!selectedChild && childrenData.length === 0) {
      return (
        <Card>
@@ -66,7 +36,7 @@ export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }:
         </CardHeader>
         <CardContent>
           <div className="text-sm text-muted-foreground mt-4">
-              Click the button to simulate a new device connecting.
+              Navigate to "Pair New Device" to connect your first device.
           </div>
         </CardContent>
       </Card>
@@ -87,11 +57,6 @@ export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }:
               ))}
             </SelectContent>
           </Select>
-          
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handlePairNewDevice} disabled={isPairing} title="Simulate new device connection">
-            {isPairing ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlusCircle className="h-4 w-4" />}
-            <span className="sr-only">Pair New Device</span>
-          </Button>
         </div>
         
         {selectedChild ? (

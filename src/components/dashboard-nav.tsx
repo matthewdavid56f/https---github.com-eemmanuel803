@@ -9,9 +9,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarHeader,
+  SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Logo } from "@/components/icons"
-import { LayoutDashboard, MapPin, Users, Phone, MessageSquare, Camera, Folder, Settings, Shield } from "lucide-react"
+import { LayoutDashboard, MapPin, Users, Phone, MessageSquare, Camera, Folder, Settings, Shield, PlusCircle } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -31,6 +32,10 @@ export function DashboardNav() {
     { href: "/app-settings", icon: <Settings />, label: "App Settings" },
     { href: "/device-controls", icon: <Shield />, label: "Device Controls" },
   ]
+  
+  const actionItems = [
+      { href: "/pair-device", icon: <PlusCircle />, label: "Pair New Device" }
+  ]
 
   return (
     <div className="flex h-full flex-col">
@@ -44,6 +49,27 @@ export function DashboardNav() {
       <SidebarGroup className="flex-1">
         <SidebarMenu>
           {navItems.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.href)}
+                tooltip={item.label}
+              >
+                <Link href={item.href}>
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroup>
+
+      <SidebarSeparator />
+
+       <SidebarGroup>
+         <SidebarMenu>
+           {actionItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
