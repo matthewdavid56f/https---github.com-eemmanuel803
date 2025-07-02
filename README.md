@@ -43,7 +43,7 @@ After the last command, the terminal will give you a link like **http://localhos
 
 ## How to Run on Android (Termux - Advanced)
 
-Running a full web development environment on a phone is complex and may not work on all devices. These are advanced instructions.
+Running a full web development environment on a phone is complex. Follow these steps exactly to avoid file permission errors.
 
 ### Step 1: Prepare Termux
 
@@ -59,30 +59,36 @@ Open Termux and run these commands to install the tools you need. Press Enter af
     ```
     (A popup will ask for permission on your phone. You must allow it.)
 
-### Step 2: Find and Unzip the Project
+### Step 2: Move Project to a Safe Location
+
+This is the most important part. We must move the project out of the shared Downloads folder and into Termux's private home directory.
 
 1.  Go to your Downloads directory:
     ```bash
     cd ~/storage/downloads
     ```
-2.  Find the downloaded file. It's probably named `studio-master.zip` or something similar. Unzip it:
+2.  Unzip the project file. (Change the filename if yours is different).
     ```bash
     unzip "studio-master.zip"
     ```
-    (You might need to change the filename to match what you downloaded).
-
-3.  This will create a `studio-master` folder. Just like on the computer, you need to go inside it twice:
+3.  **Move the project folder** into your Termux home directory and rename it to `my-app`:
     ```bash
-    cd studio-master/studio-master
+    mv studio-master/studio-master ~/my-app
     ```
+    *Note: If you downloaded the project from GitHub, the folder name might be different, for example `guad-eyes-app-main`. Adjust the command accordingly.*
 
-### Step 3: Run the App
+### Step 3: Install and Run the App
 
-1.  Now, install all the code libraries. This command fixes the error you saw before. This might take a long time on a phone.
+1.  Now, go into the new project folder you just moved:
+    ```bash
+    cd ~/my-app
+    ```
+2.  Install all the code libraries. This command will now work correctly:
     ```bash
     npm install --legacy-peer-deps
     ```
-2.  Finally, start the application:
+    (This might take a long time on a phone. Be patient.)
+3.  Finally, start the application:
     ```bash
     npm run dev
     ```
@@ -92,7 +98,7 @@ If everything works, Termux will show a link like **http://localhost:9002**. You
 ---
 ## Troubleshooting (Termux)
 
-If `npm install` fails with an `ENOTEMPTY` error, or `npm run dev` fails with `next: not found`, it means the installation is broken. To fix it, run this single command:
+If `npm install` fails with an `EACCES` or `ENOTEMPTY` error, or `npm run dev` fails with `next: not found`, it means the installation is broken or you ran it from the wrong directory. To fix it, run this single command from inside your project directory (`~/my-app`):
 
 ```bash
 npm run reinstall
