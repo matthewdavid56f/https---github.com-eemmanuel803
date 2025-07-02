@@ -12,7 +12,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Logo } from "@/components/icons"
-import { LayoutDashboard, MapPin, Users, Phone, MessageSquare, Camera, Folder, Settings, Shield } from "lucide-react"
+import { LayoutDashboard, MapPin, Users, Phone, MessageSquare, Camera, Folder, Settings, Shield, UserPlus } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -31,6 +31,7 @@ export function DashboardNav() {
     { href: "/file-explorer", icon: <Folder />, label: "File Explorer" },
     { href: "/app-settings", icon: <Settings />, label: "App Settings" },
     { href: "/device-controls", icon: <Shield />, label: "Device Controls" },
+    { href: "/pair-device", icon: <UserPlus />, label: "Pair New Device" },
   ]
 
   return (

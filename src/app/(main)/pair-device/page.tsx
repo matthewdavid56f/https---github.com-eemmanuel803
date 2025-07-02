@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { PlusCircle, Loader2, Radar, CheckCircle, UserPlus } from "lucide-react"
+import { PlusCircle, Loader2, UserPlus, Server, CheckCircle } from "lucide-react"
 
 import {
   Card,
@@ -13,6 +13,14 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,29 +28,42 @@ import { useToast } from "@/hooks/use-toast"
 import { useChild } from "@/contexts/child-context"
 import { pairNewDevice } from "@/lib/data"
 
-type PairingStep = "listening" | "deviceFound" | "pairing" | "paired"
+type DiscoveredDevice = {
+  id: string
+  name: string
+}
 
 export default function PairDevicePage() {
   const router = useRouter()
   const { toast } = useToast()
   const { addNewChild } = useChild()
-  const [step, setStep] = React.useState<PairingStep>("listening")
-  const [foundDeviceName, setFoundDeviceName] = React.useState<string | null>(null)
+  const [discoveredDevices, setDiscoveredDevices] = React.useState<DiscoveredDevice[]>([])
+  const [pairingDevice, setPairingDevice] = React.useState<DiscoveredDevice | null>(null)
   const [childName, setChildName] = React.useState("")
+  const [isPairing, setIsPairing] = React.useState(false)
+  const [isSearching, setIsSearching] = React.useState(true)
 
   React.useEffect(() => {
-    // Simulate listening for a device when the page loads
+    // Simulate searching for devices when the page loads
     const timer = setTimeout(() => {
-      const deviceId = Math.floor(Math.random() * 9000) + 1000;
-      setFoundDeviceName(`Android Model ${deviceId}`);
-      setStep("deviceFound")
-    }, 4000)
+      const devices: DiscoveredDevice[] = Array.from({ length: 4 }).map((_, i) => ({
+        id: `device_${i}_${Date.now()}`,
+        name: `Android Model ${Math.floor(Math.random() * 9000) + 1000}`
+      }));
+      setDiscoveredDevices(devices);
+      setIsSearching(false)
+    }, 2500)
 
     return () => clearTimeout(timer)
   }, [])
 
+  const handleStartPairing = (device: DiscoveredDevice) => {
+    setPairingDevice(device);
+    setChildName("");
+  }
+
   const handleCompletePairing = async () => {
-    if (!childName.trim()) {
+    if (!childName.trim() || !pairingDevice) {
       toast({
         title: "Name Required",
         description: "Please enter a name for your child to complete pairing.",
@@ -51,17 +72,18 @@ export default function PairDevicePage() {
       return
     }
 
-    setStep("pairing")
+    setIsPairing(true)
     try {
-      const newChild = await pairNewDevice(childName.trim(), foundDeviceName!)
+      const newChild = await pairNewDevice(childName.trim(), pairingDevice.name)
       if (newChild) {
         addNewChild(newChild)
         toast({
           title: "New Device Connected",
-          description: `${newChild.name}'s device has been added to your dashboard.`,
+          description: `${newChild.name}'s device (${pairingDevice.name}) has been added.`,
         })
-        setStep("paired")
-        setTimeout(() => router.push("/dashboard"), 2000)
+        setDiscoveredDevices(devices => devices.filter(d => d.id !== pairingDevice.id))
+        setPairingDevice(null)
+        setTimeout(() => router.push("/dashboard"), 1000)
       } else {
         throw new Error("Failed to get new child data back from the service.")
       }
@@ -71,101 +93,96 @@ export default function PairDevicePage() {
         description: `Could not pair the new device: ${error instanceof Error ? error.message : "Please try again."}`,
         variant: "destructive",
       })
-      setStep("deviceFound") // Go back to the previous step on failure
+    } finally {
+      setIsPairing(false)
     }
   }
-
-  const renderContent = () => {
-    switch (step) {
-      case "listening":
-        return {
-          icon: <Radar className="w-16 h-16 text-primary animate-pulse" />,
-          title: "Listening for New Devices",
-          description: "Waiting for a device with the companion app to connect to the network...",
-          content: null,
-          footer: null,
-        }
-      case "deviceFound":
-        return {
-          icon: <CheckCircle className="w-16 h-16 text-green-500" />,
-          title: "Device Found!",
-          description: `A new device (${foundDeviceName}) has been detected. Assign a name to complete the pairing.`,
-          content: (
-            <div className="space-y-2 pt-4">
-              <Label htmlFor="child-name">Child's Name</Label>
-              <Input 
-                id="child-name" 
-                placeholder="e.g., John Doe" 
-                value={childName}
-                onChange={(e) => setChildName(e.target.value)}
-              />
-            </div>
-          ),
-          footer: (
-            <Button className="w-full" onClick={handleCompletePairing}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Complete Pairing
-            </Button>
-          ),
-        }
-      case "pairing":
-        return {
-          icon: <Loader2 className="w-16 h-16 text-primary animate-spin" />,
-          title: "Finalizing Connection...",
-          description: "Securely pairing the device to your account. Please wait.",
-          content: null,
-          footer: (
-            <Button className="w-full" disabled>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Pairing...
-            </Button>
-          ),
-        }
-      case "paired":
-        return {
-          icon: <CheckCircle className="w-16 h-16 text-primary" />,
-          title: "Pairing Successful!",
-          description: "The device has been linked. Redirecting to your dashboard...",
-          content: null,
-          footer: null
-        }
-    }
-  }
-
-  const currentStep = renderContent()
 
   return (
     <div className="flex flex-1 flex-col h-full p-6 md:p-8">
       <header className="mb-8">
         <div className="flex items-center gap-4">
           <div className="p-2 bg-primary/10 border border-primary/20 rounded-lg">
-            <PlusCircle className="w-6 h-6 text-primary" />
+            <UserPlus className="w-6 h-6 text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Pair a New Device</h1>
-            <p className="text-muted-foreground">This dashboard is actively listening for new devices.</p>
+            <p className="text-muted-foreground">Nearby devices with the companion app installed will appear here.</p>
           </div>
         </div>
       </header>
-      <main className="flex-1 flex items-center justify-center">
-        <Card className="w-full max-w-lg">
+      <main className="flex-1">
+        <Card>
           <CardHeader>
-            <CardTitle>{currentStep.title}</CardTitle>
-            <CardDescription>{currentStep.description}</CardDescription>
+            <CardTitle>Discovered Devices</CardTitle>
+            <CardDescription>
+              {isSearching ? "Searching for devices on your network..." : "Select a device to begin pairing."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8 min-h-[12rem]">
-              {currentStep.icon}
-              {currentStep.content}
-            </div>
+            {isSearching ? (
+              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8 min-h-[12rem]">
+                <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                <p className="mt-4 text-muted-foreground">Listening...</p>
+              </div>
+            ) : discoveredDevices.length > 0 ? (
+              <ul className="space-y-3">
+                {discoveredDevices.map((device) => (
+                  <li key={device.id} className="flex items-center justify-between p-4 rounded-lg border bg-background hover:bg-muted/50">
+                    <div className="flex items-center gap-4">
+                      <Server className="w-6 h-6 text-muted-foreground" />
+                      <div>
+                        <p className="font-medium">{device.name}</p>
+                        <p className="text-sm text-muted-foreground">Ready to pair</p>
+                      </div>
+                    </div>
+                    <Button onClick={() => handleStartPairing(device)}>Pair</Button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8 min-h-[12rem]">
+                <Server className="w-12 h-12 text-muted-foreground" />
+                <p className="mt-4 text-muted-foreground">No new devices found.</p>
+                <p className="text-xs text-muted-foreground mt-1">Ensure the companion app is open on the child's device.</p>
+              </div>
+            )}
           </CardContent>
-          {currentStep.footer && (
-            <CardFooter>
-                {currentStep.footer}
-            </CardFooter>
-          )}
         </Card>
       </main>
+
+      <Dialog open={!!pairingDevice} onOpenChange={(isOpen) => !isOpen && setPairingDevice(null)}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Pair with {pairingDevice?.name}</DialogTitle>
+                <DialogDescription>
+                    To finish, please assign a name to this device. This will help you identify it on your dashboard.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="child-name" className="text-right">
+                        Child's Name
+                    </Label>
+                    <Input
+                        id="child-name"
+                        value={childName}
+                        onChange={(e) => setChildName(e.target.value)}
+                        className="col-span-3"
+                        placeholder="e.g., Jane Doe"
+                        disabled={isPairing}
+                    />
+                </div>
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setPairingDevice(null)} disabled={isPairing}>Cancel</Button>
+                <Button onClick={handleCompletePairing} disabled={isPairing || !childName.trim()}>
+                    {isPairing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                    Complete Pairing
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
