@@ -104,6 +104,17 @@ export type DiscoveredDevice = {
 // Initialize Firestore
 const db = getFirestore(app);
 
+const handleFirestoreError = (error: any, context: string) => {
+    if (error.code === 'permission-denied') {
+      console.error(
+        `Firestore Permission Error in ${context}: The security rules for your project are preventing the app from accessing Firestore. ` +
+        `To fix this for development, go to your Firebase project's Firestore 'Rules' tab and allow reads/writes. ` +
+        `For example: \`allow read, write: if true;\` (NOTE: This is insecure and for development only).`
+      );
+    } else {
+      console.error(`Error in ${context}:`, error);
+    }
+}
 
 export async function getDiscoveredDevices(): Promise<DiscoveredDevice[]> {
   try {
@@ -115,7 +126,7 @@ export async function getDiscoveredDevices(): Promise<DiscoveredDevice[]> {
     } as DiscoveredDevice));
     return devicesList;
   } catch (error) {
-    console.error("Error fetching discovered devices from Firestore:", error);
+    handleFirestoreError(error, "getDiscoveredDevices");
     return [];
   }
 }
@@ -137,7 +148,7 @@ export async function getChildren(): Promise<ChildSummary[]> {
     });
     return childrenList;
   } catch (error) {
-    console.error("Error fetching children from Firestore:", error);
+    handleFirestoreError(error, "getChildren");
     return [];
   }
 }
@@ -152,7 +163,7 @@ export async function getChildById(id: string): Promise<Child | null> {
       return null;
     }
   } catch(error) {
-    console.error(`Error fetching child by ID "${id}" from Firestore:`, error);
+    handleFirestoreError(error, `getChildById(${id})`);
     return null;
   }
 }
@@ -212,7 +223,7 @@ export async function pairNewDevice(childName: string, device: DiscoveredDevice)
     // When live, we get the real object back with its ID from firestore
     return { id: docRef.id, ...newChildData };
   } catch (error) {
-    console.error("Error adding document to Firestore: ", error);
+    handleFirestoreError(error, "pairNewDevice");
     return null;
   }
 }
