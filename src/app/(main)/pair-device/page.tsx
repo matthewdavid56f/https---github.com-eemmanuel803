@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { PlusCircle, Loader2, UserPlus, Server, CheckCircle } from "lucide-react"
+import { Loader2, UserPlus, Server, CheckCircle, RefreshCw } from "lucide-react"
 
 import {
   Card,
@@ -11,7 +11,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card"
 import {
   Dialog,
@@ -41,17 +40,30 @@ export default function PairDevicePage() {
   const [pairingDevice, setPairingDevice] = React.useState<DiscoveredDevice | null>(null)
   const [childName, setChildName] = React.useState("")
   const [isPairing, setIsPairing] = React.useState(false)
-  const [isSearching, setIsSearching] = React.useState(true)
+  const [isRefreshing, setIsRefreshing] = React.useState(false)
+
+  const searchForDevices = React.useCallback(async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    
+    // In a real application, this would be an API call to find unpaired devices.
+    // For this shell, we simulate a delay and always return an empty list.
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setDiscoveredDevices([]);
+    
+    setIsRefreshing(false);
+  }, [isRefreshing]);
 
   React.useEffect(() => {
-    // Simulate searching for devices, but do not add fake data.
-    // In a real application, you would connect to a service here to find real devices.
-    const timer = setTimeout(() => {
-      setIsSearching(false)
-    }, 2500)
+    searchForDevices(); // Initial search on load
+    
+    const intervalId = setInterval(() => {
+      searchForDevices();
+    }, 5000); // Automatically refresh every 5 seconds
 
-    return () => clearTimeout(timer)
-  }, [])
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }, [searchForDevices]);
+
 
   const handleStartPairing = (device: DiscoveredDevice) => {
     setPairingDevice(device);
@@ -110,16 +122,24 @@ export default function PairDevicePage() {
       <main className="flex-1">
         <Card>
           <CardHeader>
-            <CardTitle>Discovered Devices</CardTitle>
-            <CardDescription>
-              {isSearching ? "Searching for devices on your network..." : "Select a device to begin pairing."}
-            </CardDescription>
+            <div className="flex justify-between items-center">
+                <div>
+                    <CardTitle>Discovered Devices</CardTitle>
+                    <CardDescription>
+                    {isRefreshing && discoveredDevices.length === 0 ? "Searching for devices on your network..." : "Actively listening for new devices."}
+                    </CardDescription>
+                </div>
+                <Button variant="outline" onClick={searchForDevices} disabled={isRefreshing}>
+                    <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    Refresh
+                </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            {isSearching ? (
+            {isRefreshing && discoveredDevices.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8 min-h-[12rem]">
                 <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                <p className="mt-4 text-muted-foreground">Listening...</p>
+                <p className="mt-4 text-muted-foreground">Searching...</p>
               </div>
             ) : discoveredDevices.length > 0 ? (
               <ul className="space-y-3">
