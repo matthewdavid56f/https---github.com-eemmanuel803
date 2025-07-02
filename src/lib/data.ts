@@ -36,6 +36,7 @@ export type App = {
   iconClassName?: string;
   version: string;
   packageName: string;
+  isHidden: boolean;
 };
 
 export type FileSystemItem = {
@@ -171,8 +172,8 @@ export async function pairNewDevice(): Promise<Child | null> {
     callLogs: [],
     smsMessages: [],
     installedApps: [
-      { name: 'Browser', icon: 'Globe', version: '1.0', packageName: 'com.android.chrome', iconClassName: 'text-blue-500' },
-      { name: 'Phone', icon: 'Phone', version: '1.0', packageName: 'com.android.dialer', iconClassName: 'text-green-500' },
+      { name: 'Browser', icon: 'Globe', version: '1.0', packageName: 'com.android.chrome', iconClassName: 'text-blue-500', isHidden: false },
+      { name: 'Phone', icon: 'Phone', version: '1.0', packageName: 'com.android.dialer', iconClassName: 'text-green-500', isHidden: false },
     ],
     fileSystem: {
       '/': [

@@ -12,7 +12,7 @@ import { z } from 'genkit';
 
 const DeviceCommandInputSchema = z.object({
   childName: z.string().describe("The name of the child whose device will receive the command."),
-  command: z.enum(['lock', 'unlock', 'sendMessage', 'openWebsite', 'openApp', 'pinApp', 'sendSms']).describe('The type of command to send.'),
+  command: z.enum(['lock', 'unlock', 'sendMessage', 'openWebsite', 'openApp', 'pinApp', 'sendSms', 'hideApp', 'unhideApp']).describe('The type of command to send.'),
   payload: z.object({
     duration: z.string().optional().describe('The duration for the lock or pin command (e.g., "30 minutes").'),
     message: z.string().optional().describe('The text for the popup message or SMS.'),
@@ -73,6 +73,12 @@ const deviceCommandFlow = ai.defineFlow(
             break;
         case 'sendSms':
             message = `SMS to ${input.payload.recipient} queued for sending from ${input.childName}'s device.`;
+            break;
+        case 'hideApp':
+            message = `Command to hide ${input.payload.appName || 'app'} sent to ${input.childName}'s device.`;
+            break;
+        case 'unhideApp':
+            message = `Command to unhide ${input.payload.appName || 'app'} sent to ${input.childName}'s device.`;
             break;
     }
 

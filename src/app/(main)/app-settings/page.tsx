@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { useChild } from "@/contexts/child-context"
 import type { App } from "@/contexts/child-context"
@@ -56,9 +57,18 @@ const AppIcon = ({ name, className }: { name: string; className?: string }) => {
 export default function AppSettingsPage() {
   const { toast } = useToast()
   const { selectedChild, isSwitching } = useChild()
+  const [apps, setApps] = React.useState<App[]>([])
   const [selectedApp, setSelectedApp] = React.useState<App | null>(null)
   const [timerMinutes, setTimerMinutes] = React.useState("15")
   const [loadingCommands, setLoadingCommands] = React.useState<Record<string, boolean>>({});
+
+  React.useEffect(() => {
+    if (selectedChild) {
+      setApps(selectedChild.installedApps);
+    } else {
+      setApps([]);
+    }
+  }, [selectedChild]);
 
   const handleCommand = async (command: DeviceCommandInput['command'], payload: DeviceCommandInput['payload'], app: App) => {
     if (!selectedChild) return;
@@ -75,6 +85,11 @@ export default function AppSettingsPage() {
         const result = await sendDeviceCommand(input);
         if (result.success) {
             toast({ title: "Command Sent", description: result.message });
+            if (command === 'hideApp' || command === 'unhideApp') {
+              setApps(currentApps => currentApps.map(a => 
+                a.packageName === app.packageName ? { ...a, isHidden: command === 'hideApp' } : a
+              ));
+            }
         } else {
             throw new Error(result.message);
         }
@@ -120,7 +135,7 @@ export default function AppSettingsPage() {
               <Settings className="w-8 h-8 text-primary" />
               <div>
                   <h1 className="text-2xl font-bold">{selectedChild.name}'s Application Settings</h1>
-                  <p className="text-muted-foreground">View installed apps and send commands to open or pin them.</p>
+                  <p className="text-muted-foreground">Manage app visibility and send remote commands.</p>
               </div>
           </div>
           <Button disabled={isAnyCommandLoading}>
@@ -140,14 +155,15 @@ export default function AppSettingsPage() {
                         <TableRow>
                             <TableHead className="w-[350px]">Application</TableHead>
                             <TableHead>Version</TableHead>
+                            <TableHead>Hidden</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {selectedChild.installedApps.map((app) => {
+                        {apps.map((app) => {
                             const isOpenLoading = loadingCommands[`openApp-${app.packageName}`];
                             return (
-                              <TableRow key={app.packageName}>
+                              <TableRow key={app.packageName} className={cn(app.isHidden && 'bg-muted/50')}>
                                   <TableCell>
                                       <div className="flex items-center gap-4">
                                           <AppIcon name={app.icon} className={app.iconClassName} />
@@ -158,12 +174,20 @@ export default function AppSettingsPage() {
                                       </div>
                                   </TableCell>
                                   <TableCell>{app.version}</TableCell>
+                                  <TableCell>
+                                      <Switch
+                                        checked={app.isHidden ?? false}
+                                        onCheckedChange={(checked) => handleCommand(checked ? 'hideApp' : 'unhideApp', {}, app)}
+                                        disabled={isAnyCommandLoading}
+                                        aria-label={`Hide ${app.name}`}
+                                      />
+                                  </TableCell>
                                   <TableCell className="text-right space-x-2">
-                                      <Button variant="outline" size="sm" onClick={() => handleCommand('openApp', {}, app)} disabled={isAnyCommandLoading}>
+                                      <Button variant="outline" size="sm" onClick={() => handleCommand('openApp', {}, app)} disabled={isAnyCommandLoading || app.isHidden}>
                                           {isOpenLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
                                           Open
                                       </Button>
-                                      <Button variant="outline" size="sm" onClick={() => setSelectedApp(app)} disabled={isAnyCommandLoading}>
+                                      <Button variant="outline" size="sm" onClick={() => setSelectedApp(app)} disabled={isAnyCommandLoading || app.isHidden}>
                                           <Pin className="mr-2 h-4 w-4" /> Pin App
                                       </Button>
                                   </TableCell>
