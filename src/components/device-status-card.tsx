@@ -15,9 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Smartphone, Loader2 } from "lucide-react"
+import { Smartphone, Loader2, PlusCircle } from "lucide-react"
 import type { ChildSummary, Child } from "@/lib/data"
 import { useChild } from "@/contexts/child-context"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
+import { pairNewDevice } from "@/lib/data"
+
 
 interface DeviceStatusCardProps {
   childrenData: ChildSummary[];
@@ -26,6 +30,33 @@ interface DeviceStatusCardProps {
 }
 
 export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }: DeviceStatusCardProps) {
+  const { addNewChild } = useChild();
+  const { toast } = useToast();
+  const [isAdding, setIsAdding] = React.useState(false);
+
+  const handlePairDevice = async () => {
+    setIsAdding(true);
+    try {
+      const newChild = await pairNewDevice();
+      if (newChild) {
+        addNewChild(newChild);
+        toast({
+          title: "New Device Discovered",
+          description: `${newChild.name}'s device has been added to your dashboard.`,
+        });
+      } else {
+        throw new Error("Pairing service failed to return a new device.");
+      }
+    } catch (error) {
+      toast({
+        title: "Pairing Failed",
+        description: "Could not add a new device at this time.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAdding(false);
+    }
+  };
   
   if (!selectedChild && childrenData.length === 0) {
      return (
@@ -59,11 +90,16 @@ export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }:
           </Select>
         </div>
         
-        {selectedChild ? (
-            <Smartphone className="h-4 w-4 text-muted-foreground" />
-        ) : (
-            <Loader2 className="h-4 w-4 text-muted-foreground animate-spin"/>
-        )}
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePairDevice} disabled={isAdding}>
+            {isAdding ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlusCircle className="h-4 w-4" />}
+          </Button>
+          {selectedChild ? (
+              <Smartphone className="h-4 w-4 text-muted-foreground" />
+          ) : (
+              <Loader2 className="h-4 w-4 text-muted-foreground animate-spin"/>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {selectedChild ? (

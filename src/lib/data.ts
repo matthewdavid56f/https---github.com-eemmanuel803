@@ -148,10 +148,14 @@ export async function getChildById(id: string): Promise<Child | null> {
   }
 }
 
-export async function pairNewDevice(name: string, deviceName: string): Promise<Child | null> {
+export async function pairNewDevice(): Promise<Child | null> {
+  const deviceId = Math.floor(Math.random() * 9000) + 1000;
+  const deviceName = `Android Model ${deviceId}`;
+  const name = `Device ${deviceId}`;
+
   const newChildData: Omit<Child, 'id' | 'createdAt'> = {
     name,
-    avatar: name.charAt(0).toUpperCase(),
+    avatar: "D",
     deviceName,
     isOnline: true,
     batteryLevel: Math.floor(Math.random() * 40) + 60,
