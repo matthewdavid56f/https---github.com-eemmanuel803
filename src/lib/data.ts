@@ -106,10 +106,10 @@ const db = getFirestore(app);
 
 const handleFirestoreError = (error: any, context: string) => {
     if (error.code === 'permission-denied') {
-      console.error(
-        `Firestore Permission Error in ${context}: The security rules for your project are preventing the app from accessing Firestore. ` +
+      console.warn(
+        `Firestore Permission Warning in ${context}: The security rules for your project are preventing the app from accessing Firestore. ` +
         `To fix this for development, go to your Firebase project's Firestore 'Rules' tab and allow reads/writes. ` +
-        `For example: \`allow read, write: if true;\` (NOTE: This is insecure and for development only).`
+        `For example: \`rules_version = '2'; service cloud.firestore { match /databases/{database}/documents { match /{document=**} { allow read, write: if true; } } }\` (NOTE: This is insecure and for development only).`
       );
     } else {
       console.error(`Error in ${context}:`, error);
