@@ -128,7 +128,7 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
              </div>
-          ) : !selectedChild ? (
+          ) : childrenData.length === 0 ? (
              <NoDeviceConnected />
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
@@ -147,7 +147,7 @@ export default function DashboardPage() {
               ) : (
                 <ActivityFeed activities={processedActivities} />
               )}
-              <ScreenTimeChart chartData={selectedChild.screenTimeData} />
+              <ScreenTimeChart chartData={selectedChild?.screenTimeData ?? []} />
             </div>
           )}
        </div>

@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/select"
 import { Smartphone, Loader2 } from "lucide-react"
 import type { ChildSummary, Child } from "@/lib/data"
-import { useRouter } from "next/navigation"
 
 
 interface DeviceStatusCardProps {
@@ -27,7 +26,6 @@ interface DeviceStatusCardProps {
 }
 
 export function DeviceStatusCard({ childrenData, selectedChild, onChildChange }: DeviceStatusCardProps) {
-  const router = useRouter();
   
   if (!selectedChild && childrenData.length === 0) {
      return (
