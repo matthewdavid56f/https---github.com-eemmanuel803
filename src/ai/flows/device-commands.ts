@@ -8,7 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const DeviceCommandInputSchema = z.object({
   childName: z.string().describe("The name of the child whose device will receive the command."),
