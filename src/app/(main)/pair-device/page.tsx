@@ -44,13 +44,9 @@ export default function PairDevicePage() {
   const [isSearching, setIsSearching] = React.useState(true)
 
   React.useEffect(() => {
-    // Simulate searching for devices when the page loads
+    // Simulate searching for devices, but do not add fake data.
+    // In a real application, you would connect to a service here to find real devices.
     const timer = setTimeout(() => {
-      const devices: DiscoveredDevice[] = Array.from({ length: 4 }).map((_, i) => ({
-        id: `device_${i}_${Date.now()}`,
-        name: `Android Model ${Math.floor(Math.random() * 9000) + 1000}`
-      }));
-      setDiscoveredDevices(devices);
       setIsSearching(false)
     }, 2500)
 
