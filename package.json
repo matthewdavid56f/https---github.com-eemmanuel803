@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "reinstall": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.13.0",

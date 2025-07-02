@@ -88,3 +88,14 @@ Open Termux and run these commands to install the tools you need. Press Enter af
     ```
 
 If everything works, Termux will show a link like **http://localhost:9002**. You can open this in the web browser on your phone to see the app.
+
+---
+## Troubleshooting (Termux)
+
+If `npm install` fails with an `ENOTEMPTY` error, or `npm run dev` fails with `next: not found`, it means the installation is broken. To fix it, run this single command:
+
+```bash
+npm run reinstall
+```
+
+This will automatically clean up the broken files and try the installation again. After it finishes, you can start the app with `npm run dev`.
